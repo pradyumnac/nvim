@@ -39,7 +39,6 @@ end)
 
 -- When we are bootstrapping a configuration, it doesn't
 -- make sense to execute the rest of the init.lua.
---
 -- You'll need to restart nvim, and then it will work.
 if is_bootstrap then
   print '=================================='
@@ -49,14 +48,6 @@ if is_bootstrap then
   print '=================================='
   return
 end
-
--- Automatically source and re-compile packer whenever you save this init.lua
--- local packer_group = vim.api.nvim_create_augroup('Packer', { clear = true })
--- vim.api.nvim_create_autocmd('BufWritePost', {
---   command = 'source <afile> | PackerCompile',
---   group = packer_group,
---   pattern = vim.fn.expand '$MYVIMRC',
--- })
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
