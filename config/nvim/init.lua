@@ -249,7 +249,7 @@ keymap("n", "<leader>sh", ":!", silent_opts)
 -- command! QA qall
 -- command! E e
 -- command! Wq wq
-k, silent_ops)eymap("n","<leader>tn", ":call NumberToggle()<cr>", silent_opts)
+keymap("n","<leader>tn", ":call NumberToggle()<cr>", silent_opts)
 -- }}}
 
 
