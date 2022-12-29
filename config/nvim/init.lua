@@ -10,24 +10,42 @@ end
 require('packer').startup(function(use)
   -- Package manager
   use 'wbthomason/packer.nvim'
+  -- lsp related plugins
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
   use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
+  
+  -- Treesitter
+  use {
+      'nvim-treesitter/nvim-treesitter',
+      run = function()
+          local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
+          ts_update()
+      end,
+  }
 
-	-- Git related plugins
+  -- dap
+  use 'mfussenegger/nvim-dap'
+
+
+  -- Git related plugins
   use 'tpope/vim-fugitive'
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
 
+  -- Appearences
   use 'navarasu/onedark.nvim' -- Theme inspired by Atom
   use {
     'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true }
   }
+
+  -- Utilities
   use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
   use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
+  use 'junegunn/vim-peekaboo' -- Show Refisters on "
 
 	-- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
@@ -190,9 +208,41 @@ cmp.setup {
 -- Treesitter
 
 
--- Example custom configuration for lua
---
 -- Make runtime files discoverable to the server
 local runtime_path = vim.split(package.path, ';')
 table.insert(runtime_path, 'lua/?.lua')
 table.insert(runtime_path, 'lua/?/init.lua')
+
+-- Custom Keymaps {{{
+local silent_opts = { noremap = true, silent = true }
+local opts = { noremap = true, silent = false }
+local term_opts = { silent = true }
+local keymap = vim.api.nvim_set_keymap
+
+-- Modes
+--   normal_mode = "n",
+--   insert_mode = "i",
+--   visual_mode = "v",
+--   visual_block_mode = "x",
+--   term_mode = "t",
+--   command_mode = "c",
+
+-- Maps: Default 
+keymap("i", "jk", "<ESC>", silent_opts)
+keymap("i", "kj", "<ESC>", silent_opts)
+keymap("n", "j", "gj", silent_opts)
+keymap("n", "k", "gk", silent_opts)
+
+-- Plugin management 
+keymap("n", "<leader>vr", ":sp $MYVIMRC<cr>", silent_opts)
+keymap("n", "<leader>vi", ":vi $MYVIMRC<cr>", silent_opts)
+keymap("n", "<leader>so", ":source $MYVIMRC<cr>", opts)
+keymap("n", "<leader>pc", ":PackerClean<cr>", silent_opts)
+keymap("n", "<leader>pi", ":PackerInstall<cr>", silent_opts)
+keymap("n", "<leader>pu", ":PackerUpdate<cr>", silent_opts)
+
+-- Save/Save-Quit/Quit
+keymap("n", "<C-s>", ":w<cr>", opts)
+keymap("i", "<C-s>", "<ESC>:w<cr>", opts)
+
+-- }}}
