@@ -10,7 +10,8 @@ end
 require('packer').startup(function(use)
   -- Package manager
   use 'wbthomason/packer.nvim'
-  -- lsp related plugins
+  use 'dstein64/vim-startuptime'
+  -- lsp related plugins
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
@@ -29,13 +30,13 @@ require('packer').startup(function(use)
   -- dap
   use 'mfussenegger/nvim-dap'
 
-
   -- Git related plugins
   use 'tpope/vim-fugitive'
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
 
   -- Appearences
+  use 'gruvbox-community/gruvbox'
   use 'navarasu/onedark.nvim' -- Theme inspired by Atom
   use {
     'nvim-lualine/lualine.nvim',
@@ -90,7 +91,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
 -- Set colorscheme
 vim.o.termguicolors = true
-vim.cmd [[colorscheme onedark]]
+vim.cmd [[colorscheme gruvbox]]
 -- [[ Basic Keymaps ]]
 -- Set <space> as the leader key
 -- See `:help mapleader`
