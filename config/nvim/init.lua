@@ -221,7 +221,7 @@ keymap("n", "j", "gj", silent_opts)
 keymap("n", "k", "gk", silent_opts)
 -- Plugin management 
 keymap("n", "<leader>se", ":vi $MYVIMRC<cr>", silent_opts)
-keymap("n", "<leader>so", ":source $MYVIMRC<cr>", opts)
+keymap("n", "<leader>ss", ":source $MYVIMRC<cr>", opts)
 keymap("n", "<leader>sc", ":PackerClean<cr>", silent_opts)
 keymap("n", "<leader>si", ":PackerInstall<cr>", silent_opts)
 keymap("n", "<leader>su", ":PackerUpdate<cr>", silent_opts)
