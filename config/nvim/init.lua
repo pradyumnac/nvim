@@ -74,38 +74,29 @@ end
 -- See `:help vim.o`
 -- Set highlight on search
 vim.o.hlsearch = false
-
 -- Make line numbers default
 vim.wo.number = true
-
 -- Enable mouse mode
 vim.o.mouse = 'a'
-
 -- Enable break indent
 -- vim.o.breakindent = true
-
 -- Save undo history
 vim.o.undofile = true
-
 -- Case insensitive searching UNLESS /C or capital in search
 vim.o.ignorecase = true
 vim.o.smartcase = true
-
 -- Decrease update time
 vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
-
 -- Set colorscheme
 vim.o.termguicolors = true
 vim.cmd [[colorscheme onedark]]
-
 -- [[ Basic Keymaps ]]
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
@@ -147,11 +138,10 @@ require('gitsigns').setup {
   },
 }
 
+-- Config: lsp/cmp/luasnps
 -- Add additional capabilities supported by nvim-cmp
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
 local lspconfig = require('lspconfig')
-
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
 local servers = { 'pyright', 'tsserver', 'gopls' }
 for _, lsp in ipairs(servers) do
@@ -160,10 +150,8 @@ for _, lsp in ipairs(servers) do
     capabilities = capabilities,
   }
 end
-
 -- luasnip setup
 local luasnip = require 'luasnip'
-
 -- nvim-cmp setup
 local cmp = require 'cmp'
 cmp.setup {
@@ -218,7 +206,6 @@ local silent_opts = { noremap = true, silent = true }
 local opts = { noremap = true, silent = false }
 local term_opts = { silent = true }
 local keymap = vim.api.nvim_set_keymap
-
 -- Modes
 --   normal_mode = "n",
 --   insert_mode = "i",
@@ -226,13 +213,11 @@ local keymap = vim.api.nvim_set_keymap
 --   visual_block_mode = "x",
 --   term_mode = "t",
 --   command_mode = "c",
-
--- Maps: Default 
+-- Maps: Default {{{
 keymap("i", "jk", "<ESC>", silent_opts)
 keymap("i", "kj", "<ESC>", silent_opts)
 keymap("n", "j", "gj", silent_opts)
 keymap("n", "k", "gk", silent_opts)
-
 -- Plugin management 
 keymap("n", "<leader>vr", ":sp $MYVIMRC<cr>", silent_opts)
 keymap("n", "<leader>vi", ":vi $MYVIMRC<cr>", silent_opts)
@@ -240,9 +225,31 @@ keymap("n", "<leader>so", ":source $MYVIMRC<cr>", opts)
 keymap("n", "<leader>pc", ":PackerClean<cr>", silent_opts)
 keymap("n", "<leader>pi", ":PackerInstall<cr>", silent_opts)
 keymap("n", "<leader>pu", ":PackerUpdate<cr>", silent_opts)
-
 -- Save/Save-Quit/Quit
 keymap("n", "<C-s>", ":w<cr>", opts)
 keymap("i", "<C-s>", "<ESC>:w<cr>", opts)
-
+keymap("n", "<leader>qw", ":wq<cr>", opts)
+keymap("n", "<leader>qa", ":qa<cr>", opts)
+keymap("n", "<leader>qx", ":q<cr>", opts)
+keymap("n", "<leader>qxxx", ":q!<cr>", opts)
+-- " Get off my lawn
+-- keymap("n","Left",":echoe "Use h"<CR>", opts)
+-- keymap("n","Right",":echoe "Use l"<CR>", opts)
+-- keymap("n","Up",":echoe "Use k"<CR>", opts)
+-- keymap("n","Down",":echoe "Use j"<CR>", opts)
+-- Toggle relative line numbers
+keymap("n", "leader>tn", ":call NumberToggle()<cr>", opts)
+-- src:https://gist.github.com/jedfoster/0559494b1ff8f16cd15f
+keymap("n", "<leader><leader>", ":", silent_opts)
+keymap("n", "<leader>sh", ":!", silent_opts)
+-- -- command mode typos
+-- map q: :q
+-- command! Q q -- Bind :Q to :q
+-- command! Qall qall
+-- command! QA qall
+-- command! E e
+-- command! Wq wq
+k, silent_ops)eymap("n","<leader>tn", ":call NumberToggle()<cr>", silent_opts)
 -- }}}
+
+
