@@ -61,7 +61,7 @@ require('packer').startup(function(use)
     'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true }
   }
-  use {'akinsho/bufferline.nvim', tag = "v3.*", requires = 'nvim-tree/nvim-web-devicons'}
+  -- use {'akinsho/bufferline.nvim', tag = "v3.*", requires = 'nvim-tree/nvim-web-devicons'}
 
   -- Utilities
   use 'mhinz/vim-startify'
@@ -279,32 +279,36 @@ require("toggleterm").setup({
 
 -- }}}
 
--- Config: Bufferline {{{
---
-require("bufferline").setup({
-  options = {
-    diagnostics = "nvim_lsp",
-    separator_style = "thick",
-    diagnostics_indicator = function(_, _, diagnostics_dict)
-            local s = " "
-            for e, n in pairs(diagnostics_dict) do
-                    local sym = e == "error" and " "
-                            or (e == "warning" and " " or (e == "info" and " " or " "))
-                    s = s .. " " .. sym .. n
-            end
-            return s
-    end,
-    offsets = {
-            {
-                    filetype = "NvimTree",
-                    text = "Nvim Tree",
-                    highlight = "Directory",
-                    text_align = "left",
-            },
-    },
-  },
-})
--- }}}
+-- -- Config: Bufferline {{{
+-- --
+-- require("bufferline").setup({
+--   options = {
+--     diagnostics = "nvim_lsp",
+--     separator_style = "thick",
+--     diagnostics_indicator = function(_, _, diagnostics_dict)
+--             local s = " "
+--             for e, n in pairs(diagnostics_dict) do
+--                     local sym = e == "error" and " "
+--                             or (e == "warning" and " " or (e == "info" and " " or " "))
+--                     s = s .. " " .. sym .. n
+--             end
+--             return s
+--     end,
+--     offsets = {
+--             {
+--                     filetype = "NvimTree",
+--                     text = "Nvim Tree",
+--                     highlight = "Directory",
+--                     text_align = "left",
+--             },
+--     },
+--   },
+-- })
+-- -- }}}
+
+-- Config: Telescope {{{
+
+---}}}
 
 -- Treesitter
 
