@@ -1,4 +1,6 @@
--- Install packer
+-- vim: foldmethod=marker
+--
+-- Install packer {{{
 local install_path = vim.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nvim'
 local is_bootstrap = false
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
@@ -6,11 +8,17 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.fn.execute('!git clone https://github.com/wbthomason/packer.nvim ' .. install_path)
   vim.cmd [[packadd packer.nvim]]
 end
+-- }}}
 
 require('packer').startup(function(use)
-  -- Package manager
+  -- Package manager {{{
   use 'wbthomason/packer.nvim'
-  -- use 'dstein64/vim-startuptime'
+
+  -- Go Plugin
+  use 'fatih/vim-go' -- Go Plugin 
+  use 'leoluz/nvim-dap-go'
+
+
   -- lsp related plugins
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
@@ -34,21 +42,46 @@ require('packer').startup(function(use)
   use 'tpope/vim-fugitive'
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
+  use 'mattn/webapi-vim' -- vim gist dependency
+  use 'mattn/vim-gist' -- Gist helpers @Prefix: gs
+
+  -- Navigation
+  -- use 'unblevable/quick-scope' --Char jump highlight
+  
+  -- Text Manipulation
+  use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
+  use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
+  use 'jiangmiao/auto-pairs'
+  use 'tpope/vim-surround' -- ysiw, ysaw ysa}
 
   -- Appearences
-  -- use 'gruvbox-community/gruvbox'
-  use 'navarasu/onedark.nvim' -- Theme inspired by Atom
+  use 'gruvbox-community/gruvbox'
+  -- use 'navarasu/onedark.nvim' -- Theme inspired by Atom
   use {
     'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true }
   }
+  use {'akinsho/bufferline.nvim', tag = "v3.*", requires = 'nvim-tree/nvim-web-devicons'}
 
   -- Utilities
-  use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
-  use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
+  use 'mhinz/vim-startify'
   use 'junegunn/vim-peekaboo' -- Show Refisters on "
+  use 'simnalamburt/vim-mundo' -- Undo
+  use 'ellisonleao/glow.nvim' -- Markdown
+  use 'majutsushi/tagbar'  --Right Ctags bar ( Universal ctags, install separately)
+  use 'junegunn/goyo.vim' -- Distraction free
+  use 'akinsho/toggleterm.nvim' -- Distraction free
+  -- use { "akinsho/toggleterm.nvim", tag = '*', config = function()
+  --   require("toggleterm").setup()
+  -- end
+  -- }
 
-	-- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
+  -- Diagnostics {{{
+  -- use 'dstein64/vim-startuptime'
+  -- }}}
+
+  -- Custom Plugins/Bootstrap {{{
+  -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
   if has_plugins then
     plugins(use)
@@ -57,6 +90,7 @@ require('packer').startup(function(use)
   if is_bootstrap then
     require('packer').sync()
   end
+  -- }}}
 end)
 
 -- When we are bootstrapping a configuration, it doesn't
@@ -69,9 +103,10 @@ if is_bootstrap then
   print '       then restart nvim'
   print '=================================='
   return
+  -- }}}
 end
 
--- [[ Setting options ]]
+-- Config: [[ Setting options ]] {{{
 -- See `:help vim.o`
 -- Set highlight on search
 vim.o.hlsearch = false
@@ -91,7 +126,7 @@ vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
 -- Set colorscheme
 vim.o.termguicolors = true
-vim.cmd [[colorscheme onedark]]
+vim.cmd [[colorscheme gruvbox]]
 -- [[ Basic Keymaps ]]
 -- Set <space> as the leader key
 -- See `:help mapleader`
@@ -112,8 +147,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = highlight_group,
   pattern = '*',
 })
+-- }}}
 
--- Set lualine as statusline
+-- Config: Statusline{{{
 -- See `:help lualine.txt`
 require('lualine').setup {
   options = {
@@ -123,11 +159,13 @@ require('lualine').setup {
     section_separators = '',
   },
 }
+-- }}}
 
--- Enable Comment.nvim
+-- Config: Comment{{{
 require('Comment').setup()
+-- }}}
 
--- Gitsigns
+-- Config: Gitsigns {{{
 -- See `:help gitsigns.txt`
 require('gitsigns').setup {
   signs = {
@@ -138,8 +176,15 @@ require('gitsigns').setup {
     changedelete = { text = '~' },
   },
 }
+-- }}}
 
--- Config: lsp/cmp/luasnps
+-- Config: Quickscope {{{
+vim.g.qs_highlight_on_keys = {'f', 'F'}
+vim.g.qs_buftype_blacklist = {'terminal', 'nofile'}
+vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
+-- }}}
+
+-- Config: lsp/cmp/luasnps {{{
 -- Add additional capabilities supported by nvim-cmp
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local lspconfig = require('lspconfig')
@@ -193,16 +238,83 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+-- }}}
+
+-- Config: Terminal {{{ 
+require("toggleterm").setup({
+  -- size can be a number or function which is passed the current terminal
+  -- size = 20 | function(term)
+  function(term)
+          if term.direction == "horizontal" then
+                  return 20
+          elseif term.direction == "vertical" then
+                  return vim.o.columns * 0.4
+          end
+  end,
+  hide_numbers = false, -- hide the number column in toggleterm buffers
+  shade_filetypes = {},
+  shade_terminals = true,
+  start_in_insert = true,
+  insert_mappings = false, -- whether or not the open mapping applies in insert mode
+  persist_size = true,
+  -- direction = 'vertical' | 'horizontal' | 'window' | 'float',
+  direction = "tab",
+  close_on_exit = true, -- close the terminal window when the process exits
+  shell = fish, -- change the default shell
+  -- This field is only relevant if direction is set to 'float'
+  float_opts = {
+          -- The border key is *almost* the same as 'nvim_open_win'
+          -- see :h nvim_open_win for details on borders however
+          -- the 'curved' border is a custom border type
+          -- not natively supported but implemented in this plugin.
+          -- border = 'single' | 'double' | 'shadow' | 'curved' | ... other options supported by win open
+          border = "curved",
+          winblend = 3,
+          highlights = {
+                  border = "Normal",
+                  background = "Normal",
+          },
+  },
+})
+
+-- }}}
+
+-- Config: Bufferline {{{
+--
+require("bufferline").setup({
+  options = {
+    diagnostics = "nvim_lsp",
+    separator_style = "thick",
+    diagnostics_indicator = function(_, _, diagnostics_dict)
+            local s = " "
+            for e, n in pairs(diagnostics_dict) do
+                    local sym = e == "error" and " "
+                            or (e == "warning" and " " or (e == "info" and " " or " "))
+                    s = s .. " " .. sym .. n
+            end
+            return s
+    end,
+    offsets = {
+            {
+                    filetype = "NvimTree",
+                    text = "Nvim Tree",
+                    highlight = "Directory",
+                    text_align = "left",
+            },
+    },
+  },
+})
+-- }}}
 
 -- Treesitter
 
-
--- Make runtime files discoverable to the server
+-- Make runtime files discoverable to the server {{{
 local runtime_path = vim.split(package.path, ';')
 table.insert(runtime_path, 'lua/?.lua')
 table.insert(runtime_path, 'lua/?/init.lua')
+-- }}}
 
--- Custom Keymaps {{{
+-- Maps: Init {{{
 local silent_opts = { noremap = true, silent = true }
 local opts = { noremap = true, silent = false }
 local term_opts = { silent = true }
@@ -214,6 +326,8 @@ local keymap = vim.api.nvim_set_keymap
 --   visual_block_mode = "x",
 --   term_mode = "t",
 --   command_mode = "c",
+--   }}}
+
 -- Maps: Default {{{
 keymap("i", "jk", "<ESC>", silent_opts)
 keymap("i", "kj", "<ESC>", silent_opts)
@@ -249,7 +363,25 @@ keymap("n", "<leader>sh", ":!", silent_opts)
 -- command! QA qall
 -- command! E e
 -- command! Wq wq
-keymap("n","<leader>tn", ":call NumberToggle()<cr>", silent_opts)
 -- }}}
 
+-- Maps: Plugins {{{
+keymap("n","<F3>", ":MundoToggle<cr>", silent_opts)
+keymap("n","<F4>", ":ToggleTerm<cr>", silent_opts)
+keymap("n","<leader>tg", ":ToggleTerm<cr>", silent_opts)
+keymap("n","<leader>tt", ":ToggleTerm<cr>", silent_opts)
+keymap("n","<leader>tf", ":ToggleTerm<cr>", silent_opts)
+function _G.set_terminal_keymaps()
+  local opts = {buffer = 0}
+  vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+  vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
+  vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
+  vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
+  vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
+  vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
+end
+
+-- if you only want these mappings for toggle term use term://*toggleterm#* instead
+vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+-- }}}
 
