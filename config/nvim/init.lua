@@ -25,6 +25,8 @@ require('packer').startup(function(use)
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
   use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
+
+  -- use "chip/telescope-software-licenses.nvim"
  
   -- Treesitter
   use {
@@ -44,11 +46,23 @@ require('packer').startup(function(use)
   use 'mfussenegger/nvim-dap'
 
   -- Git related plugins
+  use 'nvim-telescope/telescope-github.nvim'
   use 'tpope/vim-fugitive'
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
   use 'mattn/webapi-vim' -- vim gist dependency
   use 'mattn/vim-gist' -- Gist helpers @Prefix: gs
+  -- use {
+  --   'pwntester/octo.nvim',
+  --   requires = {
+  --     'nvim-lua/plenary.nvim',
+  --     'nvim-telescope/telescope.nvim',
+  --     'kyazdani42/nvim-web-devicons',
+  --   },
+  --   config = function ()
+  --     require"octo".setup()
+  --   end
+  -- }
 
   -- Navigation
   -- use 'unblevable/quick-scope' --Char jump highlight
@@ -74,8 +88,13 @@ require('packer').startup(function(use)
     requires = { {'nvim-lua/plenary.nvim'} }
   }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
-  use { "nvim-telescope/telescope-file-browser.nvim" }
+  use 'nvim-telescope/telescope-file-browser.nvim'
+  use 'LukasPietzschmann/telescope-tabs'
   
+  use {
+    'rmagatti/session-lens',
+    requires = {'rmagatti/auto-session', 'nvim-telescope/telescope.nvim'}
+  }
   use 'mhinz/vim-startify'
   use 'junegunn/vim-peekaboo' -- Show Refisters on "
   use 'simnalamburt/vim-mundo' -- Undo
@@ -339,8 +358,15 @@ require('telescope').setup{
 }
 
 require("telescope").load_extension "file_browser"
+require('session-lens').setup({--[[your custom config--]]})
+-- require("telescope").load_extension("software-licenses")
+-- require('telescope').load_extension('gh')
+--
 -- }}}
--- Treesitter
+
+-- Config: Treesitter {{{
+--
+-- }}}
 
 -- Make runtime files discoverable to the server {{{
 local runtime_path = vim.split(package.path, ';')
@@ -401,6 +427,8 @@ keymap("n", "<leader>sh", ":!", silent_opts)
 
 -- Maps: Plugins {{{
 keymap("n","<F3>", ":MundoToggle<cr>", silent_opts)
+
+-- Terminal
 keymap("n","<F4>", ":ToggleTerm<cr>", silent_opts)
 keymap("n","<leader>tg", ":ToggleTerm<cr>", silent_opts)
 keymap("n","<leader>tt", ":ToggleTerm<cr>", silent_opts)
@@ -414,18 +442,32 @@ function _G.set_terminal_keymaps()
   vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
   vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
 end
-
 -- if you only want these mappings for toggle term use term://*toggleterm#* instead
 vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
 -- telescope
 local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>,', builtin.find_files, {})
-vim.keymap.set('n', '<leader>/', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>;', builtin.buffers, {})
-vim.keymap.set('n', '<leader>\\', builtin.help_tags, {})
+vim.keymap.set('n', '<leader>-', builtin.find_files, silent_opts) -- non hidden files
+vim.keymap.set('n', '<leader>=', builtin.find_files, silent_opts) --git checked in file
+vim.keymap.set('n', '<leader>,', builtin.find_files, silent_opts)
+vim.keymap.set('n', '<leader>.', builtin.oldfiles, silent_opts)
+vim.keymap.set('n', '<leader>/', builtin.live_grep, silent_opts)
+vim.keymap.set('n', '<leader>:', builtin.current_buffer_fuzzy_find, silent_opts)
+vim.keymap.set('n', '<leader>;', builtin.buffers, silent_opts)
+vim.keymap.set('n', '<leader>\\', builtin.help_tags, silent_opts)
 
+--others
+vim.keymap.set('n', '<leader>mq', builtin.quickfix, silent_opts)
 
-keymap("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
+-- help
+vim.keymap.set('n', '<leader>mt', builtin.treesitter, silent_opts)
+vim.keymap.set('n', '<leader>mh', builtin.help_tags, silent_opts)
+vim.keymap.set('n', '<leader>mm', builtin.keymaps, silent_opts)
+vim.keymap.set('n', '<leader>ml', builtin.keymaps, silent_opts)
+vim.keymap.set('n', '<leader>mk', builtin.keymaps, silent_opts)
+vim.keymap.set('n', '<leader>mc', builtin.commands, silent_opts)
+vim.keymap.set('n', '<leader>mo', builtin.vim_options, silent_opts)
+
+vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
 -- }}}
 
