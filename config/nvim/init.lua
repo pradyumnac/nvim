@@ -35,6 +35,11 @@ require('packer').startup(function(use)
       end,
   }
 
+   use { -- Additional text objects via treesitter
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    after = 'nvim-treesitter',
+   }
+
   -- dap
   use 'mfussenegger/nvim-dap'
 
@@ -69,6 +74,7 @@ require('packer').startup(function(use)
     requires = { {'nvim-lua/plenary.nvim'} }
   }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+  use { "nvim-telescope/telescope-file-browser.nvim" }
   
   use 'mhinz/vim-startify'
   use 'junegunn/vim-peekaboo' -- Show Refisters on "
@@ -77,6 +83,11 @@ require('packer').startup(function(use)
   use 'majutsushi/tagbar'  --Right Ctags bar ( Universal ctags, install separately)
   use 'junegunn/goyo.vim' -- Distraction free
   use 'akinsho/toggleterm.nvim' -- Distraction free
+  use 'junegunn/vim-easy-align' --  Align text
+  use 'andrewradev/splitjoin.vim' --  Split/join lines
+
+
+
 
   -- Diagnostics {{{
   -- use 'dstein64/vim-startuptime'
@@ -309,11 +320,25 @@ require("toggleterm").setup({
 -- -- }}}
 
 -- Config: Telescope {{{
+require('telescope').setup{
+  extensions = {
+    file_browser = {
+      theme = "ivy",
+      -- disables netrw and use telescope-file-browser in its place
+      hijack_netrw = true,
+      mappings = {
+        ["i"] = {
+          -- your custom insert mode mappings
+        },
+        ["n"] = {
+          -- your custom normal mode mappings
+        },
+      },
+    },
+  },
+}
 
----}}}
-
--- Config: Telescope {{{
-require('telescope').setup{}
+require("telescope").load_extension "file_browser"
 -- }}}
 -- Treesitter
 
@@ -399,5 +424,8 @@ vim.keymap.set('n', '<leader>,', builtin.find_files, {})
 vim.keymap.set('n', '<leader>/', builtin.live_grep, {})
 vim.keymap.set('n', '<leader>;', builtin.buffers, {})
 vim.keymap.set('n', '<leader>\\', builtin.help_tags, {})
+
+
+keymap("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
 -- }}}
 
