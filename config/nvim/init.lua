@@ -288,7 +288,7 @@ require("toggleterm").setup({
   insert_mappings = false, -- whether or not the open mapping applies in insert mode
   persist_size = true,
   -- direction = 'vertical' | 'horizontal' | 'window' | 'float',
-  direction = "tab",
+  direction = "float",
   close_on_exit = true, -- close the terminal window when the process exits
   shell = fish, -- change the default shell
   -- This field is only relevant if direction is set to 'float'
@@ -499,6 +499,7 @@ keymap("n","<leader>tt", ":ToggleTerm<cr>", silent_opts)
 keymap("n","<leader>tf", ":ToggleTerm<cr>", silent_opts)
 function _G.set_terminal_keymaps()
   local opts = {buffer = 0}
+  vim.keymap.set('t', '<F4>', [[<esc><C-\><C-n>]], opts)
   vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
   vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
   vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
