@@ -64,6 +64,12 @@ require('packer').startup(function(use)
   -- use {'akinsho/bufferline.nvim', tag = "v3.*", requires = 'nvim-tree/nvim-web-devicons'}
 
   -- Utilities
+  use {
+  'nvim-telescope/telescope.nvim', tag = '0.1.0',
+    requires = { {'nvim-lua/plenary.nvim'} }
+  }
+  use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+  
   use 'mhinz/vim-startify'
   use 'junegunn/vim-peekaboo' -- Show Refisters on "
   use 'simnalamburt/vim-mundo' -- Undo
@@ -71,10 +77,6 @@ require('packer').startup(function(use)
   use 'majutsushi/tagbar'  --Right Ctags bar ( Universal ctags, install separately)
   use 'junegunn/goyo.vim' -- Distraction free
   use 'akinsho/toggleterm.nvim' -- Distraction free
-  -- use { "akinsho/toggleterm.nvim", tag = '*', config = function()
-  --   require("toggleterm").setup()
-  -- end
-  -- }
 
   -- Diagnostics {{{
   -- use 'dstein64/vim-startuptime'
@@ -310,6 +312,9 @@ require("toggleterm").setup({
 
 ---}}}
 
+-- Config: Telescope {{{
+require('telescope').setup{}
+-- }}}
 -- Treesitter
 
 -- Make runtime files discoverable to the server {{{
@@ -387,5 +392,12 @@ end
 
 -- if you only want these mappings for toggle term use term://*toggleterm#* instead
 vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+
+-- telescope
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>,', builtin.find_files, {})
+vim.keymap.set('n', '<leader>/', builtin.live_grep, {})
+vim.keymap.set('n', '<leader>;', builtin.buffers, {})
+vim.keymap.set('n', '<leader>\\', builtin.help_tags, {})
 -- }}}
 
