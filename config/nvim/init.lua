@@ -311,6 +311,16 @@ require("toggleterm").setup({
 
 -- }}}
 
+-- Config: session-lens {{{
+require('session-lens').setup({
+  -- path_display = {'shorten'},
+  theme = 'ivy', -- default is dropdown
+  theme_conf = { border = false },
+  previewer = true,
+  prompt_title = 'SESSIONS',
+})
+-- }}}
+
 -- -- Config: Bufferline {{{
 -- --
 -- require("bufferline").setup({
@@ -358,7 +368,6 @@ require('telescope').setup{
 }
 
 require("telescope").load_extension "file_browser"
-require('session-lens').setup({--[[your custom config--]]})
 -- require("telescope").load_extension("software-licenses")
 -- require('telescope').load_extension('gh')
 --
@@ -449,7 +458,7 @@ vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>-', builtin.find_files, silent_opts) -- non hidden files
 vim.keymap.set('n', '<leader>=', builtin.find_files, silent_opts) --git checked in file
-vim.keymap.set('n', '<leader>,', builtin.find_files, silent_opts)
+vim.keymap.set('n', '<leader>,', builtin.git_commits, silent_opts)
 vim.keymap.set('n', '<leader>.', builtin.oldfiles, silent_opts)
 vim.keymap.set('n', '<leader>/', builtin.live_grep, silent_opts)
 vim.keymap.set('n', '<leader>:', builtin.current_buffer_fuzzy_find, silent_opts)
@@ -458,6 +467,7 @@ vim.keymap.set('n', '<leader>\\', builtin.help_tags, silent_opts)
 
 --others
 vim.keymap.set('n', '<leader>mq', builtin.quickfix, silent_opts)
+keymap('n', '<leader>ms', ':SearchSession<cr>', silent_opts)
 
 -- help
 vim.keymap.set('n', '<leader>mt', builtin.treesitter, silent_opts)
