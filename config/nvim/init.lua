@@ -116,20 +116,20 @@ require('packer').startup(function(use)
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
   -- use "chip/telescope-software-licenses.nvim"
- 
+
   -- Treesitter
   use {
-      'nvim-treesitter/nvim-treesitter',
-      run = function()
-          local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
-          ts_update()
-      end,
+    'nvim-treesitter/nvim-treesitter',
+    run = function()
+      local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
+      ts_update()
+    end,
   }
 
-   use { -- Additional text objects via treesitter
+  use { -- Additional text objects via treesitter
     'nvim-treesitter/nvim-treesitter-textobjects',
     after = 'nvim-treesitter',
-   }
+  }
 
   -- dap
   use 'mfussenegger/nvim-dap'
@@ -155,12 +155,18 @@ require('packer').startup(function(use)
 
   -- Navigation
   -- use 'unblevable/quick-scope' --Char jump highlight
-  
+
   -- Text Manipulation
   use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
   use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
   use 'jiangmiao/auto-pairs'
   use 'tpope/vim-surround' -- ysiw, ysaw ysa}
+  use {
+    "AckslD/nvim-neoclip.lua",
+    requires = {
+      {'nvim-telescope/telescope.nvim'},
+    },
+  }
 
   -- Appearences
   use 'gruvbox-community/gruvbox'
@@ -173,13 +179,13 @@ require('packer').startup(function(use)
 
   -- Utilities
   use {
-  'nvim-telescope/telescope.nvim', tag = '0.1.0',
+    'nvim-telescope/telescope.nvim', tag = '0.1.0',
     requires = { {'nvim-lua/plenary.nvim'} }
   }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use 'nvim-telescope/telescope-file-browser.nvim'
   use 'LukasPietzschmann/telescope-tabs'
-  
+
   use {
     'rmagatti/session-lens',
     requires = {'rmagatti/auto-session', 'nvim-telescope/telescope.nvim'}
@@ -322,12 +328,12 @@ require("toggleterm").setup({
   -- size can be a number or function which is passed the current terminal
   -- size = 20 | function(term)
   function(term)
-          if term.direction == "horizontal" then
-                  return 20
-          elseif term.direction == "vertical" then
-                  return vim.o.columns * 0.4
-          end
-  end,
+    if term.direction == "horizontal" then
+      return 20
+    elseif term.direction == "vertical" then
+      return vim.o.columns * 0.4
+end
+end,
   hide_numbers = false, -- hide the number column in toggleterm buffers
   shade_filetypes = {},
   shade_terminals = true,
@@ -340,11 +346,11 @@ require("toggleterm").setup({
   shell = fish, -- change the default shell
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
-          -- The border key is *almost* the same as 'nvim_open_win'
-          -- see :h nvim_open_win for details on borders however
-          -- the 'curved' border is a custom border type
-          -- not natively supported but implemented in this plugin.
-          -- border = 'single' | 'double' | 'shadow' | 'curved' | ... other options supported by win open
+    -- The border key is *almost* the same as 'nvim_open_win'
+-- see :h nvim_open_win for details on borders however
+    -- the 'curved' border is a custom border type
+-- not natively supported but implemented in this plugin.
+-- border = 'single' | 'double' | 'shadow' | 'curved' | ... other options supported by win open
           border = "curved",
           winblend = 3,
           highlights = {
@@ -437,12 +443,12 @@ require'nvim-treesitter.configs'.setup {
     disable = { "c", "rust" },
     -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
     disable = function(lang, buf)
-        local max_filesize = 100 * 1024 -- 100 KB
-        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-        if ok and stats and stats.size > max_filesize then
-            return true
-        end
-    end,
+      local max_filesize = 100 * 1024 -- 100 KB
+      local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+      if ok and stats and stats.size > max_filesize then
+return true
+      end
+end,
 
     -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
     -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
@@ -477,6 +483,63 @@ require('session-lens').setup({
   previewer = true,
   prompt_title = 'SESSIONS',
 })
+-- }}}
+
+-- Config: Neoclip{{{
+require('neoclip').setup({
+  history = 1000,
+  enable_persistent_history = false,
+  length_limit = 1048576,
+  continuous_sync = false,
+  filter = nil,
+  preview = true,
+  prompt = nil,
+  default_register = '"',
+  default_register_macros = 'q',
+  enable_macro_history = true,
+  content_spec_column = false,
+  on_select = {
+    move_to_front = false,
+  },
+  on_paste = {
+    set_reg = false,
+    move_to_front = false,
+  },
+  on_replay = {
+    set_reg = false,
+    move_to_front = false,
+  },
+  keys = {
+    telescope = {
+      i = {
+        select = '<cr>',
+        paste = '<c-p>',
+        paste_behind = '<c-k>',
+        replay = '<c-q>',  -- replay a macro
+        delete = '<c-d>',  -- delete an entry
+      },
+      n = {
+        select = '<cr>',
+        paste = 'p',
+        --- It is possible to map to more than one key.
+        -- paste = { 'p', '<c-p>' },
+        paste_behind = 'P',
+        replay = 'q',
+        delete = 'd',
+        custom = {},
+      },
+    },
+    fzf = {
+      select = 'default',
+        paste = 'ctrl-p',
+        paste_behind = 'ctrl-k',
+        custom = {},
+    },
+  },
+})
+
+-- require('telescope').load_extension('neoclip')
+
 -- }}}
 
 --}}}
@@ -525,6 +588,7 @@ vim.keymap.set('n', '<leader>ml', builtin.keymaps, silent_opts)
 vim.keymap.set('n', '<leader>mk', builtin.keymaps, silent_opts)
 vim.keymap.set('n', '<leader>mc', builtin.commands, silent_opts)
 vim.keymap.set('n', '<leader>mo', builtin.vim_options, silent_opts)
+vim.keymap.set('n', '<leader>"', ":Telescope neoclip<cr>", silent_opts)
 
 vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
 -- }}}
