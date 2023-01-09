@@ -1,5 +1,93 @@
 -- vim: foldmethod=marker
---
+vim.g.mapleader = ' '
+vim.g.maplocalleader = ' '
+
+-- Config: [[ Setting options ]] {{{
+-- See `:help vim.o`
+-- Set highlight on search
+vim.o.hlsearch = false
+-- Make line numbers default
+vim.wo.number = true
+-- Enable mouse mode
+vim.o.mouse = 'a'
+-- Enable break indent
+-- vim.o.breakindent = true
+-- Save undo history
+vim.o.undofile = true
+-- Case insensitive searching UNLESS /C or capital in search
+vim.o.ignorecase = true
+vim.o.smartcase = true
+-- Decrease update time
+vim.o.updatetime = 250
+vim.wo.signcolumn = 'yes'
+-- Set colorscheme
+vim.o.termguicolors = true
+vim.cmd [[colorscheme gruvbox]]
+-- Keymaps for better default experience
+-- See `:help vim.keymap.set()`
+vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+
+-- [[ Highlight on yank ]]
+-- See `:help vim.highlight.on_yank()`
+local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
+vim.api.nvim_create_autocmd('TextYankPost', {
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+  group = highlight_group,
+  pattern = '*',
+})
+-- }}}
+
+-- Maps: Default {{{
+local silent_opts = { noremap = true, silent = true }
+local opts = { noremap = true, silent = false }
+local term_opts = { silent = true }
+local keymap = vim.api.nvim_set_keymap
+-- Modes
+--   normal_mode = "n",
+--   insert_mode = "i",
+--   visual_mode = "v",
+--   visual_block_mode = "x",
+--   term_mode = "t",
+--   command_mode = "c",
+
+keymap("i", "jk", "<ESC>", silent_opts)
+keymap("i", "kj", "<ESC>", silent_opts)
+keymap("n", "j", "gj", silent_opts)
+keymap("n", "k", "gk", silent_opts)
+-- Plugin management 
+keymap("n", "<leader>se", ":vi $MYVIMRC<cr>", opts)
+keymap("n", "<leader>ss", ":source $MYVIMRC<cr>", opts)
+keymap("n", "<leader>sc", ":PackerClean<cr>", opts)
+keymap("n", "<leader>si", ":PackerInstall<cr>", opts)
+keymap("n", "<leader>su", ":PackerUpdate<cr>", opts)
+-- Save/Save-Quit/Quit
+keymap("n", "<C-s>", ":w<cr>", opts)
+keymap("i", "<C-s>", "<ESC>:w<cr>", opts)
+keymap("n", "<leader>qw", ":wq<cr>", opts)
+keymap("n", "<leader>qa", ":qa<cr>", opts)
+keymap("n", "<leader>qx", ":q<cr>", opts)
+keymap("n", "<leader>qxxx", ":q!<cr>", opts)
+-- " Get off my lawn
+-- keymap("n","Left",":echoe "Use h"<CR>", opts)
+-- keymap("n","Right",":echoe "Use l"<CR>", opts)
+-- keymap("n","Up",":echoe "Use k"<CR>", opts)
+-- keymap("n","Down",":echoe "Use j"<CR>", opts)
+-- Toggle relative line numbers
+keymap("n", "leader>tn", ":call NumberToggle()<cr>", opts)
+-- src:https://gist.github.com/jedfoster/0559494b1ff8f16cd15f
+keymap("n", "<leader><leader>", ":", silent_opts)
+keymap("n", "<leader>sh", ":!", silent_opts)
+-- -- command mode typos
+-- map q: :q
+-- command! Q q -- Bind :Q to :q
+-- command! Qall qall
+-- command! QA qall
+-- command! E e
+-- command! Wq wq
+-- }}}
+
 -- Install packer {{{
 local install_path = vim.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nvim'
 local is_bootstrap = false
@@ -136,48 +224,7 @@ if is_bootstrap then
   -- }}}
 end
 
--- Config: [[ Setting options ]] {{{
--- See `:help vim.o`
--- Set highlight on search
-vim.o.hlsearch = false
--- Make line numbers default
-vim.wo.number = true
--- Enable mouse mode
-vim.o.mouse = 'a'
--- Enable break indent
--- vim.o.breakindent = true
--- Save undo history
-vim.o.undofile = true
--- Case insensitive searching UNLESS /C or capital in search
-vim.o.ignorecase = true
-vim.o.smartcase = true
--- Decrease update time
-vim.o.updatetime = 250
-vim.wo.signcolumn = 'yes'
--- Set colorscheme
-vim.o.termguicolors = true
-vim.cmd [[colorscheme gruvbox]]
--- [[ Basic Keymaps ]]
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
--- Keymaps for better default experience
--- See `:help vim.keymap.set()`
-vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
-
--- [[ Highlight on yank ]]
--- See `:help vim.highlight.on_yank()`
-local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
-vim.api.nvim_create_autocmd('TextYankPost', {
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-  group = highlight_group,
-  pattern = '*',
-})
--- }}}
+-- Config: Plugins {{{
 
 -- Config: Statusline{{{
 -- See `:help lualine.txt`
@@ -432,62 +479,7 @@ require('session-lens').setup({
 })
 -- }}}
 
--- Make runtime files discoverable to the server {{{
-local runtime_path = vim.split(package.path, ';')
-table.insert(runtime_path, 'lua/?.lua')
-table.insert(runtime_path, 'lua/?/init.lua')
--- }}}
-
--- Maps: Init {{{
-local silent_opts = { noremap = true, silent = true }
-local opts = { noremap = true, silent = false }
-local term_opts = { silent = true }
-local keymap = vim.api.nvim_set_keymap
--- Modes
---   normal_mode = "n",
---   insert_mode = "i",
---   visual_mode = "v",
---   visual_block_mode = "x",
---   term_mode = "t",
---   command_mode = "c",
---   }}}
-
--- Maps: Default {{{
-keymap("i", "jk", "<ESC>", silent_opts)
-keymap("i", "kj", "<ESC>", silent_opts)
-keymap("n", "j", "gj", silent_opts)
-keymap("n", "k", "gk", silent_opts)
--- Plugin management 
-keymap("n", "<leader>se", ":vi $MYVIMRC<cr>", silent_opts)
-keymap("n", "<leader>ss", ":source $MYVIMRC<cr>", opts)
-keymap("n", "<leader>sc", ":PackerClean<cr>", silent_opts)
-keymap("n", "<leader>si", ":PackerInstall<cr>", silent_opts)
-keymap("n", "<leader>su", ":PackerUpdate<cr>", silent_opts)
--- Save/Save-Quit/Quit
-keymap("n", "<C-s>", ":w<cr>", opts)
-keymap("i", "<C-s>", "<ESC>:w<cr>", opts)
-keymap("n", "<leader>qw", ":wq<cr>", opts)
-keymap("n", "<leader>qa", ":qa<cr>", opts)
-keymap("n", "<leader>qx", ":q<cr>", opts)
-keymap("n", "<leader>qxxx", ":q!<cr>", opts)
--- " Get off my lawn
--- keymap("n","Left",":echoe "Use h"<CR>", opts)
--- keymap("n","Right",":echoe "Use l"<CR>", opts)
--- keymap("n","Up",":echoe "Use k"<CR>", opts)
--- keymap("n","Down",":echoe "Use j"<CR>", opts)
--- Toggle relative line numbers
-keymap("n", "leader>tn", ":call NumberToggle()<cr>", opts)
--- src:https://gist.github.com/jedfoster/0559494b1ff8f16cd15f
-keymap("n", "<leader><leader>", ":", silent_opts)
-keymap("n", "<leader>sh", ":!", silent_opts)
--- -- command mode typos
--- map q: :q
--- command! Q q -- Bind :Q to :q
--- command! Qall qall
--- command! QA qall
--- command! E e
--- command! Wq wq
--- }}}
+--}}}
 
 -- Maps: Plugins {{{
 keymap("n","<F3>", ":MundoToggle<cr>", silent_opts)
@@ -537,3 +529,8 @@ vim.keymap.set('n', '<leader>mo', builtin.vim_options, silent_opts)
 vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
 -- }}}
 
+-- Make runtime files discoverable to the server {{{
+local runtime_path = vim.split(package.path, ';')
+table.insert(runtime_path, 'lua/?.lua')
+table.insert(runtime_path, 'lua/?/init.lua')
+-- }}}
