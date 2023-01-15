@@ -1,23 +1,80 @@
 -- vim: foldmethod=marker
+-- Neovim Configuration for Pradyumna Chatterjee
+-- Currently, I use same branch for all platforms
+-- (Windows/Linux/WSl/Termux/Raspberry Pi )
+--
+-- TODO:
+-- ctags with telescope
+
+-- vim.cmd([[
+-- set shell=bash
+-- ]])
+vim.o.encoding = "utf-8"
+vim.o.shell = "bash"
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Config: [[ Setting options ]] {{{
+
+-- TODO: port to lua
+vim.cmd([[
+" filetype plugin indent on
+" syntax on
+]])
+
 -- See `:help vim.o`
 vim.o.hlsearch = false
-vim.wo.number = true
+vim.o.incsearch = true -- starts searching as soon as typing, without enter needed
+vim.o.ignorecase = true
+vim.o.smartcase = true
+-- vim.wo.number = true
+vim.o.numberwidth = 3 -- always reserve 3 spaces for line number
+vim.o.relativenumber = true
 vim.o.mouse = 'a'
 -- vim.o.breakindent = true
 vim.o.undofile = true
-vim.o.ignorecase = true
-vim.o.smartcase = true
+vim.o.undodir = vim.fn.stdpath 'data' .. '.undo//'     -- undo files
 vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
 vim.o.termguicolors = true
-vim.cmd [[colorscheme gruvbox]]
+
+vim.o.hidden=true
+vim.o.lazyredraw=true
+vim.o.backup=false
+vim.o.writebackup=false
+vim.o.swapfile=false
+vim.o.ruler=true
+vim.o.autowrite=true
+vim.o.backspace="indent,eol,start"
+vim.o.history=1000
+vim.o.scrolloff=4
+vim.opt.clipboard="unnamed,unnamedplus"
+vim.opt.syntax="on"
+vim.o.showmatch  = true -- show matching bracket
+vim.o.matchtime = 2 -- delay before showing matching paren
+vim.o.synmaxcol = 300 -- stop syntax highlight after x lines for performance
+
+vim.o.list = false -- do not display white characters
+vim.o.foldenable = false
+vim.o.foldlevel = 4 -- limit folding to 4 levels
+vim.o.foldmethod = 'syntax' -- use language syntax to generate folds
+vim.o.wrap = false --do not wrap lines even if very long
+vim.o.eol = false -- show if there's no eol char
+vim.o.showbreak= '↪' -- character to show when line is broken
+
+vim.o.autoindent = true
+vim.o.smartindent = true
+vim.o.tabstop = 2 -- 1 tab = 2 spaces
+vim.o.shiftwidth = 2 -- indentation rule
+vim.o.formatoptions = 'qnj1' -- q  - comment formatting; n - numbered lists; j - remove comment when joining lines; 1 - don't break after one-letter word
+vim.o.expandtab = true -- expand tab to spaces
+
+
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+vim.cmd [[colorscheme gruvbox]]
+-- }}}
 
-
+--functions {{{
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
 vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function()
@@ -26,6 +83,81 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = highlight_group,
   pattern = '*',
 })
+vim.cmd([[
+function! MinExec(cmd)
+	redir @a
+	exec printf('silent %s',a:cmd)
+	redir END
+	return @a
+endfunction
+function! GetLeaderMappings()
+	let lines=MinExec('map <space>')
+	" let lines=system("rg '<leader>' ~/repos/nvim -N -I|sed 's/^[ ]*//g'|sed 's/^.*<leader>//g'|sort -r")
+	let lines=split(lines,'\n')
+	return lines
+endfunction
+function! GetMappings()
+	let lines=MinExec('map')
+	let lines=split(lines,'\n')
+	return lines
+endfunction
+function! RenameFile()
+    let old_name = expand('%')
+    let new_name = input('New file name: ', expand('%'), 'file')
+    if new_name != '' && new_name != old_name
+        exec ':saveas ' . new_name
+        exec ':silent !rm ' . old_name
+        redraw!
+    endif
+endfunction
+" run :GoBuild or :GoTestCompile based on the go file
+function! s:build_go_files()
+    let l:file = expand('%')
+    if l:file =~# '^\f\+_test\.go$'
+        call go#test#Test(0, 1)
+    elseif l:file =~# '^\f\+\.go$'
+        call go#cmd#Build(0)
+    endif
+endfunction
+" Merge a tab into a split in the previous window
+function! MergeTabs()
+    if tabpagenr() == 1
+        return
+    endif
+    let bufferName = bufname("%")
+    if tabpagenr("$") == tabpagenr()
+        close!
+    else
+        close!
+        tabprev
+    endif
+    split
+    execute "buffer " . bufferName
+endfunction
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
+function! NumberToggle()
+    if(&relativenumber == 1)
+        set norelativenumber
+        set number
+    else
+        set relativenumber
+    endif
+endfunction
+function! AdjustFontSize(amount)
+    let s:fontsize = s:fontsize+a:amount
+    :execute "GuiFont! Consolas:h" . s:fontsize
+endfunction
+]])
 -- }}}
 
 -- Maps: Default {{{
@@ -56,16 +188,16 @@ keymap("n", "<C-s>", ":w<cr>", opts)
 keymap("i", "<C-s>", "<ESC>:w<cr>", opts)
 keymap("n", "<leader>qw", ":wq<cr>", opts)
 keymap("n", "<leader>qa", ":qa<cr>", opts)
-keymap("n", "<leader>qx", ":q<cr>", opts)
+keymap("n", "<leader>q", ":q<cr>", opts)
 keymap("n", "<leader>qxxx", ":q!<cr>", opts)
--- " Get off my lawn
--- keymap("n","Left",":echoe "Use h"<CR>", opts)
--- keymap("n","Right",":echoe "Use l"<CR>", opts)
--- keymap("n","Up",":echoe "Use k"<CR>", opts)
--- keymap("n","Down",":echoe "Use j"<CR>", opts)
--- Toggle relative line numbers
+
+keymap("n", "H", "^", silent_opts)
+keymap("n", "L", "g_", silent_opts)
+keymap("n", "zC", "zM", silent_opts)
+keymap("n", "zO", "zR", silent_opts)
+
 keymap("n", "leader>tn", ":call NumberToggle()<cr>", opts)
--- src:https://gist.github.com/jedfoster/0559494b1ff8f16cd15f
+
 keymap("n", "<leader><leader>", ":", silent_opts)
 keymap("n", "<leader>sh", ":!", silent_opts)
 -- -- command mode typos
@@ -87,21 +219,22 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
 end
 -- }}}
 
--- Alt Plugin Managers: Disabled {{{
--- Lazypath {{{
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
-    lazypath,
-  })
-end
-vim.opt.rtp:prepend(lazypath)
---}}}
+-- -- Alt Plugin Managers: Disabled {{{
+-- -- Lazypath {{{
+-- local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+-- if not vim.loop.fs_stat(lazypath) then
+--   vim.fn.system({
+--     "git",
+--     "clone",
+--     "--filter=blob:none",
+--     "https://github.com/folke/lazy.nvim.git",
+--     "--branch=stable", -- latest stable release
+--     lazypath,
+--   })
+-- end
+-- vim.o.rtp:prepend(lazypath)
+-- --}}}
+--
 --Mason {{{
 -- use { "williamboman/mason.nvim" }
 --}}}
@@ -111,20 +244,7 @@ require('packer').startup(function(use)
   -- Package manager {{{
   use 'wbthomason/packer.nvim'
   use 'folke/neoconf.nvim'
-  require("neoconf").setup()
-
   -- use 'dstein64/vim-startuptime'
-
-  -- Go Plugin
-  use 'fatih/vim-go' -- Go Plugin 
-  use 'leoluz/nvim-dap-go'
-
-  -- lsp related plugins
-  use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
-  use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
-  use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
-  use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
-  use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
   -- Treesitter
   use {
@@ -134,28 +254,60 @@ require('packer').startup(function(use)
       ts_update()
     end,
   }
-
-  use { -- Additional text objects via treesitter
+  use {
     'nvim-treesitter/nvim-treesitter-textobjects',
     after = 'nvim-treesitter',
   }
 
+  -- lsp 
+  use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
+  use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
+  use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
+  use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
+  use 'L3MON4D3/LuaSnip' -- Snippets plugin
+
   -- dap
   use 'mfussenegger/nvim-dap'
+  use 'rcarriga/nvim-dap-ui'
+  use 'theHamsta/nvim-dap-virtual-text'
+  use 'leoluz/nvim-dap-go'
+  use 'mfussenegger/nvim-dap-python'
+  -- Go Plugin
+  use 'fatih/vim-go' -- Go Plugin 
+  --test
+  use 'janko-m/vim-test'
 
   -- Git related plugins
-  use 'nvim-telescope/telescope-github.nvim'
   use 'tpope/vim-fugitive'
-  use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
-  use 'mattn/webapi-vim' -- vim gist dependency
-  use 'mattn/vim-gist' -- Gist helpers @Prefix: gs
-  
-  -- use 'unblevable/quick-scope' --Char jump highlight
+  use 'nvim-telescope/telescope-github.nvim'
+
+  -- Utilities
+  use 'mhinz/vim-startify'
+  use {
+    'nvim-telescope/telescope.nvim', tag = '0.1.0',
+    requires = { {'nvim-lua/plenary.nvim'} }
+  }
+  use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+  use 'nvim-telescope/telescope-file-browser.nvim'
+  use 'LukasPietzschmann/telescope-tabs'
+  -- use {
+  --   'rmagatti/session-lens',
+  --   requires = {'rmagatti/auto-session', 'nvim-telescope/telescope.nvim'}
+  -- }
+  use 'junegunn/vim-peekaboo' -- Show Refisters on "
+  use 'nanotee/zoxide.vim'
+  use 'akinsho/toggleterm.nvim' -- Distraction free
+  use 'junegunn/vim-easy-align' --  Align text
+  use 'unblevable/quick-scope' --Char jump highlight
+
+  use 'mechatroner/rainbow_csv'
+  -- use 'junegunn/goyo.vim'
+  use 'ellisonleao/glow.nvim' -- Markdown
 
   -- Text Manipulation
   use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
-  -- use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
+  use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
   -- use 'jiangmiao/auto-pairs'
   use 'tpope/vim-surround' -- ysiw, ysaw ysa}
   use {
@@ -172,30 +324,6 @@ require('packer').startup(function(use)
     'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true }
   }
-
-  -- Utilities
-  use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.0',
-    requires = { {'nvim-lua/plenary.nvim'} }
-  }
-  use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
-  use 'nvim-telescope/telescope-file-browser.nvim'
-  use 'LukasPietzschmann/telescope-tabs'
-
-  -- use {
-  --   'rmagatti/session-lens',
-  --   requires = {'rmagatti/auto-session', 'nvim-telescope/telescope.nvim'}
-  -- }
-
-  -- use 'mhinz/vim-startify'
-  use 'junegunn/vim-peekaboo' -- Show Refisters on "
-  -- use 'simnalamburt/vim-mundo' -- Undo
-  use 'ellisonleao/glow.nvim' -- Markdown
-  -- use telescope for tabs?
-  -- use 'majutsushi/tagbar'  --Right Ctags bar ( Universal ctags, install separately)
-  use 'akinsho/toggleterm.nvim' -- Distraction free
-  use 'junegunn/vim-easy-align' --  Align text
-  -- use 'andrewradev/splitjoin.vim' --  Split/join lines
 
   -- Custom Plugins/Bootstrap {{{
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
@@ -224,6 +352,7 @@ if is_bootstrap then
 end
 
 -- Config: Plugins {{{
+require("neoconf").setup()
 
 -- Config: Statusline{{{
 -- See `:help lualine.txt`
@@ -362,7 +491,7 @@ end,
   -- direction = 'vertical' | 'horizontal' | 'window' | 'float',
   direction = "float",
   close_on_exit = true, -- close the terminal window when the process exits
-  shell = fish, -- change the default shell
+  shell = bash, -- change the default shell
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
     -- The border key is *almost* the same as 'nvim_open_win'
@@ -463,7 +592,7 @@ require'nvim-treesitter.configs'.setup {
   ignore_install = { "javascript" },
 
   ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.o.runtimepath:append("/some/path/to/store/parsers")!
 
   highlight = {
     -- `false` will disable the whole extension
@@ -620,7 +749,7 @@ vim.keymap.set('n', '<leader>mm', builtin.keymaps, silent_opts)
 vim.keymap.set('n', '<leader>ml', builtin.keymaps, silent_opts)
 vim.keymap.set('n', '<leader>mk', builtin.keymaps, silent_opts)
 vim.keymap.set('n', '<leader>mc', builtin.commands, silent_opts)
-vim.keymap.set('n', '<leader>mo', builtin.vim_options, silent_opts)
+vim.keymap.set('n', '<leader>mo', builtin.vim.o.ons, silent_opts)
 vim.keymap.set('n', '<leader>"', ":Telescope neoclip<cr>", silent_opts)
 
 vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
@@ -631,3 +760,5 @@ local runtime_path = vim.split(package.path, ';')
 table.insert(runtime_path, 'lua/?.lua')
 table.insert(runtime_path, 'lua/?/init.lua')
 -- }}}
+
+--https://github.com/arnvald/viml-to-lua
