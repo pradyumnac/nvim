@@ -27,7 +27,7 @@ vim.o.hlsearch = false
 vim.o.incsearch = true -- starts searching as soon as typing, without enter needed
 vim.o.ignorecase = true
 vim.o.smartcase = true
--- vim.wo.number = true
+vim.wo.number = true
 vim.o.numberwidth = 3 -- always reserve 3 spaces for line number
 vim.o.relativenumber = true
 vim.o.mouse = 'a'
@@ -55,7 +55,7 @@ vim.o.matchtime = 2 -- delay before showing matching paren
 vim.o.synmaxcol = 300 -- stop syntax highlight after x lines for performance
 
 vim.o.list = false -- do not display white characters
-vim.o.foldenable = false
+-- vim.o.foldenable = false
 vim.o.foldlevel = 4 -- limit folding to 4 levels
 vim.o.foldmethod = 'syntax' -- use language syntax to generate folds
 vim.o.wrap = false --do not wrap lines even if very long
@@ -244,6 +244,7 @@ require('packer').startup(function(use)
   -- Package manager {{{
   use 'wbthomason/packer.nvim'
   use 'folke/neoconf.nvim'
+  use 'williamboman/mason.nvim'
   -- use 'dstein64/vim-startuptime'
 
   -- Treesitter
@@ -353,6 +354,7 @@ end
 
 -- Config: Plugins {{{
 require("neoconf").setup()
+require("mason").setup()
 
 -- Config: Statusline{{{
 -- See `:help lualine.txt`
@@ -443,33 +445,34 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
--- USER = vim.fn.expand('$USER')
--- sumneko_binary="/home/" .. USER .. "/.sumneko/bin/lua_language_server"
--- sumneko_script="/home/" .. USER .. "/.sumneko/main.lua"
-require'lspconfig'.sumneko_lua.setup {
-  -- cmd = {sumneko_binary, "-E", sumneko_script},
-  settings = {
-    Lua = {
-      runtime = {
-        -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-        version = 'LuaJIT',
-      },
-      diagnostics = {
-        -- Get the language server to recognize the `vim` global
-        globals = {'vim'},
-      },
-      workspace = {
-        -- Make the server aware of Neovim runtime files
-        library = vim.api.nvim_get_runtime_file("", true),
-      },
-      -- Do not send telemetry data containing a randomized but unique identifier
-      telemetry = {
-        enable = false,
-      },
-    },
-  },
-}
--- }}}
+
+-- -- USER = vim.fn.expand('$USER')
+-- -- sumneko_binary="/home/" .. USER .. "/.sumneko/bin/lua_language_server"
+-- -- sumneko_script="/home/" .. USER .. "/.sumneko/main.lua"
+-- require'lspconfig'.sumneko_lua.setup {
+--   -- cmd = {sumneko_binary, "-E", sumneko_script},
+--   settings = {
+--     Lua = {
+--       runtime = {
+--         -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+--         version = 'LuaJIT',
+--       },
+--       diagnostics = {
+--         -- Get the language server to recognize the `vim` global
+--         globals = {'vim'},
+--       },
+--       workspace = {
+--         -- Make the server aware of Neovim runtime files
+--         library = vim.api.nvim_get_runtime_file("", true),
+--       },
+--       -- Do not send telemetry data containing a randomized but unique identifier
+--       telemetry = {
+--         enable = false,
+--       },
+--     },
+--   },
+-- }
+-- -- }}}
 
 -- Config: Terminal {{{ 
 require("toggleterm").setup({
@@ -749,7 +752,7 @@ vim.keymap.set('n', '<leader>mm', builtin.keymaps, silent_opts)
 vim.keymap.set('n', '<leader>ml', builtin.keymaps, silent_opts)
 vim.keymap.set('n', '<leader>mk', builtin.keymaps, silent_opts)
 vim.keymap.set('n', '<leader>mc', builtin.commands, silent_opts)
-vim.keymap.set('n', '<leader>mo', builtin.vim.o.ons, silent_opts)
+vim.keymap.set('n', '<leader>mo', builtin.vim_options, silent_opts)
 vim.keymap.set('n', '<leader>"', ":Telescope neoclip<cr>", silent_opts)
 
 vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
