@@ -4,31 +4,20 @@ vim.g.maplocalleader = ' '
 
 -- Config: [[ Setting options ]] {{{
 -- See `:help vim.o`
--- Set highlight on search
 vim.o.hlsearch = false
--- Make line numbers default
 vim.wo.number = true
--- Enable mouse mode
 vim.o.mouse = 'a'
--- Enable break indent
 -- vim.o.breakindent = true
--- Save undo history
 vim.o.undofile = true
--- Case insensitive searching UNLESS /C or capital in search
 vim.o.ignorecase = true
 vim.o.smartcase = true
--- Decrease update time
 vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
--- Set colorscheme
 vim.o.termguicolors = true
 vim.cmd [[colorscheme gruvbox]]
--- Keymaps for better default experience
--- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
--- [[ Highlight on yank ]]
--- See `:help vim.highlight.on_yank()`
+
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
 vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function()
@@ -98,15 +87,37 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
 end
 -- }}}
 
+-- Alt Plugin Managers: Disabled {{{
+-- Lazypath {{{
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+--}}}
+--Mason {{{
+-- use { "williamboman/mason.nvim" }
+--}}}
+-- }}}
+
 require('packer').startup(function(use)
   -- Package manager {{{
   use 'wbthomason/packer.nvim'
-  use 'dstein64/vim-startuptime'
+  use 'folke/neoconf.nvim'
+  require("neoconf").setup()
+
+  -- use 'dstein64/vim-startuptime'
 
   -- Go Plugin
   use 'fatih/vim-go' -- Go Plugin 
   use 'leoluz/nvim-dap-go'
-
 
   -- lsp related plugins
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
@@ -114,8 +125,6 @@ require('packer').startup(function(use)
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
   use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
-
-  -- use "chip/telescope-software-licenses.nvim"
 
   -- Treesitter
   use {
@@ -141,25 +150,13 @@ require('packer').startup(function(use)
   use 'lewis6991/gitsigns.nvim'
   use 'mattn/webapi-vim' -- vim gist dependency
   use 'mattn/vim-gist' -- Gist helpers @Prefix: gs
-  -- use {
-  --   'pwntester/octo.nvim',
-  --   requires = {
-  --     'nvim-lua/plenary.nvim',
-  --     'nvim-telescope/telescope.nvim',
-  --     'kyazdani42/nvim-web-devicons',
-  --   },
-  --   config = function ()
-  --     require"octo".setup()
-  --   end
-  -- }
-
-  -- Navigation
+  
   -- use 'unblevable/quick-scope' --Char jump highlight
 
   -- Text Manipulation
   use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
-  use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
-  use 'jiangmiao/auto-pairs'
+  -- use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
+  -- use 'jiangmiao/auto-pairs'
   use 'tpope/vim-surround' -- ysiw, ysaw ysa}
   use {
     "AckslD/nvim-neoclip.lua",
@@ -175,7 +172,6 @@ require('packer').startup(function(use)
     'nvim-lualine/lualine.nvim',
     requires = { 'kyazdani42/nvim-web-devicons', opt = true }
   }
-  -- use {'akinsho/bufferline.nvim', tag = "v3.*", requires = 'nvim-tree/nvim-web-devicons'}
 
   -- Utilities
   use {
@@ -186,23 +182,20 @@ require('packer').startup(function(use)
   use 'nvim-telescope/telescope-file-browser.nvim'
   use 'LukasPietzschmann/telescope-tabs'
 
-  use {
-    'rmagatti/session-lens',
-    requires = {'rmagatti/auto-session', 'nvim-telescope/telescope.nvim'}
-  }
-  use 'mhinz/vim-startify'
+  -- use {
+  --   'rmagatti/session-lens',
+  --   requires = {'rmagatti/auto-session', 'nvim-telescope/telescope.nvim'}
+  -- }
+
+  -- use 'mhinz/vim-startify'
   use 'junegunn/vim-peekaboo' -- Show Refisters on "
-  use 'simnalamburt/vim-mundo' -- Undo
+  -- use 'simnalamburt/vim-mundo' -- Undo
   use 'ellisonleao/glow.nvim' -- Markdown
-  use 'majutsushi/tagbar'  --Right Ctags bar ( Universal ctags, install separately)
-  use 'junegunn/goyo.vim' -- Distraction free
+  -- use telescope for tabs?
+  -- use 'majutsushi/tagbar'  --Right Ctags bar ( Universal ctags, install separately)
   use 'akinsho/toggleterm.nvim' -- Distraction free
   use 'junegunn/vim-easy-align' --  Align text
-  use 'andrewradev/splitjoin.vim' --  Split/join lines
-
-  -- Diagnostics {{{
-  -- use 'dstein64/vim-startuptime'
-  -- }}}
+  -- use 'andrewradev/splitjoin.vim' --  Split/join lines
 
   -- Custom Plugins/Bootstrap {{{
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
@@ -272,7 +265,7 @@ vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local lspconfig = require('lspconfig')
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-local servers = { 'pyright', 'tsserver', 'gopls' }
+local servers = { 'pyright', 'tsserver', 'gopls', 'sumneko_lua' }
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     -- on_attach = my_custom_on_attach,
@@ -319,6 +312,32 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
+  },
+}
+-- USER = vim.fn.expand('$USER')
+-- sumneko_binary="/home/" .. USER .. "/.sumneko/bin/lua_language_server"
+-- sumneko_script="/home/" .. USER .. "/.sumneko/main.lua"
+require'lspconfig'.sumneko_lua.setup {
+  -- cmd = {sumneko_binary, "-E", sumneko_script},
+  settings = {
+    Lua = {
+      runtime = {
+        -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+        version = 'LuaJIT',
+      },
+      diagnostics = {
+        -- Get the language server to recognize the `vim` global
+        globals = {'vim'},
+      },
+      workspace = {
+        -- Make the server aware of Neovim runtime files
+        library = vim.api.nvim_get_runtime_file("", true),
+      },
+      -- Do not send telemetry data containing a randomized but unique identifier
+      telemetry = {
+        enable = false,
+      },
+    },
   },
 }
 -- }}}
@@ -390,22 +409,36 @@ end,
 -- -- }}}
 
 -- Config: Telescope {{{
+-- https://github.com/nvim-telescope/telescope.nvim/blob/master/lua/telescope/mappings.lua 
+local actions = require'telescope.actions'
 require('telescope').setup{
-  extensions = {
-    file_browser = {
-      theme = "ivy",
-      -- disables netrw and use telescope-file-browser in its place
-      hijack_netrw = true,
-      mappings = {
-        ["i"] = {
-          -- your custom insert mode mappings
-        },
-        ["n"] = {
-          -- your custom normal mode mappings
-        },
-      },
-    },
-  },
+	defaults = {
+		mappings = {
+			i = {
+			    ["<esc>"] = actions.close,
+			    ["<tab>"] = actions.add_selection,
+			    ["<cr>"] = actions.select_tab,
+			    ["<C-t>"] = actions.select_default,
+			},
+			n = {
+			    ["<esc>"] = actions.close,
+			    ["<tab>"] = actions.add_selection,
+			    ["<cr>"] = actions.select_tab,
+			    ["<C-t>"] = actions.select_default,
+			},
+		},
+	},
+	extensions = {
+		file_browser = {
+      		theme = "ivy",
+      		-- disables netrw and use telescope-file-browser in its place
+      		hijack_netrw = true,
+	      	mappings = {
+			["i"] = {},
+			["n"] = {},
+	      	},
+    		},
+  	},
 }
 
 require("telescope").load_extension "file_browser"
@@ -472,18 +505,18 @@ end,
 
 -- }}}
 
--- Config: Sessions {{{
-require('auto-session').setup({
-  auto_session_enabled = false
-})
-require('session-lens').setup({
-  -- path_display = {'shorten'},
-  theme = 'ivy', -- default is dropdown
-  theme_conf = { border = false },
-  previewer = true,
-  prompt_title = 'SESSIONS',
-})
--- }}}
+-- -- Config: Sessions Disabled {{{
+-- require('auto-session').setup({
+--   auto_session_enabled = false
+-- })
+-- require('session-lens').setup({
+--   -- path_display = {'shorten'},
+--   theme = 'ivy', -- default is dropdown
+--   theme_conf = { border = false },
+--   previewer = true,
+--   prompt_title = 'SESSIONS',
+-- })
+-- -- }}}
 
 -- Config: Neoclip{{{
 require('neoclip').setup({
