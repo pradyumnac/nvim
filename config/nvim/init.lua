@@ -71,7 +71,6 @@ vim.o.expandtab = true -- expand tab to spaces
 
 
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
-vim.cmd [[colorscheme gruvbox]]
 -- }}}
 
 --functions {{{
@@ -764,4 +763,5 @@ table.insert(runtime_path, 'lua/?.lua')
 table.insert(runtime_path, 'lua/?/init.lua')
 -- }}}
 
+vim.cmd [[colorscheme gruvbox]]
 --https://github.com/arnvald/viml-to-lua
