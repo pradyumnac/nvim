@@ -204,7 +204,8 @@ keymap("n", "L", "g_", silent_opts)
 keymap("n", "zC", "zM", silent_opts)
 keymap("n", "zO", "zR", silent_opts)
 
-keymap("n", "leader>tn", ":call NumberToggle()<cr>", opts)
+keymap("n", "<leader>tn", ":call NumberToggle()<cr>", opts)
+keymap("n", "<leader>fr", ":call RenameFile()<cr>", opts)
 
 keymap("n", "<leader><leader>", ":", silent_opts)
 keymap("n", "<leader>sh", ":!", silent_opts)
@@ -364,6 +365,7 @@ end
 -- Config: Plugins {{{
 require("neoconf").setup()
 require("mason").setup()
+-- }}}
 
 -- Config: Statusline{{{
 -- See `:help lualine.txt`
