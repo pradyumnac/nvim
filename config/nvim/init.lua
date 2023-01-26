@@ -6,7 +6,7 @@
 -- TODO:
 -- ctags with telescope
 
--- vim.cmd([[
+-- vim.cmd([[{{{}}}
 -- set shell=bash
 -- ]])
 vim.o.encoding = "utf-8"
@@ -72,6 +72,15 @@ vim.o.expandtab = true -- expand tab to spaces
 
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- }}}
+
+-- Autocmds {{{{{{
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "lua" },
+  callback = function()
+    vim.o.foldlevel = 0
+  end,
+})
+-- }}}}}}
 
 --functions {{{
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
@@ -395,8 +404,33 @@ vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
 -- Add additional capabilities supported by nvim-cmp
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local lspconfig = require('lspconfig')
+-- Enable sumneklpo lua for nvim
+require'lspconfig'.sumneko_lua.setup {
+    -- ... other configs
+    settings = {
+      Lua = {
+        runtime = {
+        -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+        version = 'LuaJIT',
+        },
+        diagnostics = {
+          -- Get the language server to recognize the `vim` global
+          globals = {'vim'},
+        },
+        workspace = {
+          -- Make the server aware of Neovim runtime files
+          library = vim.api.nvim_get_runtime_file("", true),
+        },
+        -- Do not send telemetry data containing a randomized but unique identifier
+        telemetry = {
+          enable = false,
+        },
+      }
+    }
+}
+
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-local servers = { 'pyright', 'tsserver', 'gopls', 'sumneko_lua' }
+local servers = { 'pyright', 'tsserver', 'gopls'}
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     -- on_attach = my_custom_on_attach,
@@ -447,33 +481,6 @@ cmp.setup {
   },
 }
 
--- -- USER = vim.fn.expand('$USER')
--- -- sumneko_binary="/home/" .. USER .. "/.sumneko/bin/lua_language_server"
--- -- sumneko_script="/home/" .. USER .. "/.sumneko/main.lua"
--- require'lspconfig'.sumneko_lua.setup {
---   -- cmd = {sumneko_binary, "-E", sumneko_script},
---   settings = {
---     Lua = {
---       runtime = {
---         -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
---         version = 'LuaJIT',
---       },
---       diagnostics = {
---         -- Get the language server to recognize the `vim` global
---         globals = {'vim'},
---       },
---       workspace = {
---         -- Make the server aware of Neovim runtime files
---         library = vim.api.nvim_get_runtime_file("", true),
---       },
---       -- Do not send telemetry data containing a randomized but unique identifier
---       telemetry = {
---         enable = false,
---       },
---     },
---   },
--- }
--- -- }}}
 
 -- Config: Terminal {{{ 
 require("toggleterm").setup({
