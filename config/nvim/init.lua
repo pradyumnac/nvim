@@ -83,6 +83,11 @@ vim.api.nvim_create_autocmd("FileType", {
 -- }}}}}}
 
 --functions {{{
+local has_words_before = function()
+  unpack = unpack or table.unpack
+  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+end
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
 vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function()
@@ -274,8 +279,14 @@ require('packer').startup(function(use)
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
   use 'hrsh7th/cmp-nvim-lua' -- LSP source for nvim-cmp
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
+
+  -- SNIPPETS
+  --
   use 'saadparwaiz1/cmp_luasnip' -- Snippets source for nvim-cmp
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
+  use "rafamadriz/friendly-snippets"
+  use "honza/vim-snippets"
+  use "molleweide/LuaSnip-snippets.nvim"
 
   -- dap
   use 'mfussenegger/nvim-dap'
@@ -457,16 +468,21 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
+    ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
+      -- You could replace the expand_or_jumpable() calls with expand_or_locally_jumpable() 
+      -- they way you will only jump inside the snippet region
       elseif luasnip.expand_or_jumpable() then
         luasnip.expand_or_jump()
+      elseif has_words_before() then
+        cmp.complete()
       else
         fallback()
       end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
+    end, { "i", "s" }),
+
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
       elseif luasnip.jumpable(-1) then
@@ -474,15 +490,56 @@ cmp.setup {
       else
         fallback()
       end
-    end, { 'i', 's' }),
+    end, { "i", "s" }),
   }),
   sources = {
     { name = 'nvim_lsp' },
     { name = 'nvim_lua' },
-    { name = 'luasnip' },
+    { name = 'luasnip', option = { show_autosnippets = true }},
   },
 }
 
+local types = require("luasnip.util.types")
+luasnip.setup({
+	history = true,
+	-- Update more often, :h events for more info.
+	update_events = "TextChanged,TextChangedI",
+	-- Snippets aren't automatically removed if their text is deleted.
+	-- `delete_check_events` determines on which events (:h events) a check for
+	-- deleted snippets is performed.
+	-- This can be especially useful when `history` is enabled.
+	delete_check_events = "TextChanged",
+	ext_opts = {
+		[types.choiceNode] = {
+			active = {
+				virt_text = { { "choiceNode", "Comment" } },
+			},
+		},
+	},
+	-- treesitter-hl has 100, use something higher (default is 200).
+	ext_base_prio = 300,
+	-- minimal increase in priority.
+	ext_prio_increase = 1,
+	enable_autosnippets = true,
+	-- mapping for cutting selected text so it's usable as SELECT_DEDENT,
+	-- SELECT_RAW or TM_SELECTED_TEXT (mapped via xmap).
+	store_selection_keys = "<Tab>",
+	-- luasnip uses this function to get the currently active filetype. This
+	-- is the (rather uninteresting) default, but it's possible to use
+	-- eg. treesitter for getting the current filetype by setting ft_func to
+	-- require("luasnip.extras.filetype_functions").from_cursor (requires
+	-- `nvim-treesitter/nvim-treesitter`). This allows correctly resolving
+	-- the current filetype in eg. a markdown-code block or `vim.cmd()`.
+	ft_func = function()
+		return vim.split(vim.bo.filetype, ".", true)
+	end,
+})
+-- luasnip.snippets=require("luasnip-snippets").load_snippets()
+require("luasnip.loaders.from_vscode").lazy_load()
+require("luasnip.loaders.from_snipmate").lazy_load()
+
+
+-- }}}
 
 -- Config: Terminal {{{ 
 require("toggleterm").setup({
