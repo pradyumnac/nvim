@@ -279,6 +279,7 @@ require('packer').startup(function(use)
   use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
   use 'hrsh7th/cmp-nvim-lua' -- LSP source for nvim-cmp
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
+  use 'williamboman/mason-lspconfig.nvim'
 
   -- SNIPPETS
   --
@@ -411,6 +412,13 @@ require('gitsigns').setup {
 vim.g.qs_highlight_on_keys = {'f', 'F'}
 vim.g.qs_buftype_blacklist = {'terminal', 'nofile'}
 vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
+-- }}}
+
+-- Config: Mason-Lspconfig {{{
+require("mason-lspconfig").setup {
+    ensure_installed = { "sumneko_lua", "gopls", "pyright" },
+  automatic_installation=true
+}
 -- }}}
 
 -- Config: lsp/cmp/luasnps {{{
@@ -773,8 +781,6 @@ require('neoclip').setup({
 -- require('telescope').load_extension('neoclip')
 
 -- }}}
-
---}}}
 
 -- Maps: Plugins {{{
 keymap("n","<F3>", ":MundoToggle<cr>", silent_opts)
