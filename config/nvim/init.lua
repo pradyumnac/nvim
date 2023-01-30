@@ -376,7 +376,6 @@ end
 
 -- Config: Plugins {{{
 require("neoconf").setup()
-require("mason").setup()
 -- }}}
 
 -- Config: Statusline{{{
@@ -421,6 +420,19 @@ require("mason-lspconfig").setup {
 }
 -- }}}
 
+-- Config: Mason {{{
+require("mason").setup({
+    ui = {
+        icons = {
+            package_installed = "✓",
+            package_pending = "➜",
+            package_uninstalled = "✗"
+        }
+    }
+})
+
+-- }}}
+
 -- Config: lsp/cmp/luasnps {{{
 -- Add additional capabilities supported by nvim-cmp
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
@@ -451,6 +463,7 @@ require'lspconfig'.sumneko_lua.setup {
 }
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
+-- TODO: Isnt this duplicate with mason
 local servers = { 'pyright', 'tsserver', 'gopls'}
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
