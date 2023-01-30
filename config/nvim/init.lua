@@ -82,7 +82,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 -- }}}}}}
 
---functions {{{
+-- Functions {{{
 local has_words_before = function()
   unpack = unpack or table.unpack
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -818,7 +818,12 @@ vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
 -- telescope
 local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>-', builtin.find_files, silent_opts) -- non hidden files
+local find_files_no_ignore = function()
+  builtin.find_files({
+    no_ignore = true
+  })
+end
+vim.keymap.set('n', '<leader>-', find_files_no_ignore, silent_opts) -- non hidden files
 vim.keymap.set('n', '<leader>=', builtin.find_files, silent_opts) --git checked in file
 vim.keymap.set('n', '<leader>,', builtin.git_commits, silent_opts)
 vim.keymap.set('n', '<leader>.', builtin.oldfiles, silent_opts)
