@@ -68,9 +68,14 @@ vim.o.tabstop = 2 -- 1 tab = 2 spaces
 vim.o.shiftwidth = 2 -- indentation rule
 vim.o.formatoptions = 'qnj1' -- q  - comment formatting; n - numbered lists; j - remove comment when joining lines; 1 - don't break after one-letter word
 vim.o.expandtab = true -- expand tab to spaces
-
+vim.o.completeopt = 'menuone,noselect'
 
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+
+-- Make runtime files discoverable to the server
+local runtime_path = vim.split(package.path, ';')
+table.insert(runtime_path, 'lua/?.lua')
+table.insert(runtime_path, 'lua/?/init.lua')
 -- }}}
 
 -- Autocmds {{{{{{
@@ -280,6 +285,7 @@ require('packer').startup(function(use)
   use 'hrsh7th/cmp-nvim-lua' -- LSP source for nvim-cmp
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
   use 'williamboman/mason-lspconfig.nvim'
+  use 'j-hui/fidget.nvim'
 
   -- SNIPPETS
   --
@@ -414,8 +420,9 @@ vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
 -- }}}
 
 -- Config: Mason-Lspconfig {{{
+-- lua fails over and over in armv8l - not available for arch
 require("mason-lspconfig").setup {
-    ensure_installed = { "sumneko_lua", "gopls", "pyright" },
+    ensure_installed = { "gopls", "pyright" },
   automatic_installation=true
 }
 -- }}}
@@ -471,8 +478,10 @@ for _, lsp in ipairs(servers) do
     capabilities = capabilities,
   }
 end
+
 -- luasnip setup
 local luasnip = require 'luasnip'
+
 -- nvim-cmp setup
 local cmp = require 'cmp'
 cmp.setup {
@@ -502,7 +511,6 @@ cmp.setup {
         fallback()
       end
     end, { "i", "s" }),
-
     ["<S-Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
@@ -559,6 +567,12 @@ luasnip.setup({
 require("luasnip.loaders.from_vscode").lazy_load()
 require("luasnip.loaders.from_snipmate").lazy_load()
 
+
+-- }}}
+
+-- Config: LSPFidget {{{
+-- Turn on lsp status information
+require('fidget').setup()
 
 -- }}}
 
@@ -721,6 +735,50 @@ end,
       node_decremental = "grm",
     },
   },
+  textobjects = {
+    select = {
+      enable = true,
+      lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+      keymaps = {
+        -- You can use the capture groups defined in textobjects.scm
+        ['aa'] = '@parameter.outer',
+        ['ia'] = '@parameter.inner',
+        ['af'] = '@function.outer',
+        ['if'] = '@function.inner',
+        ['ac'] = '@class.outer',
+        ['ic'] = '@class.inner',
+      },
+    },
+    move = {
+      enable = true,
+      set_jumps = true, -- whether to set jumps in the jumplist
+      goto_next_start = {
+        [']m'] = '@function.outer',
+        [']]'] = '@class.outer',
+      },
+      goto_next_end = {
+        [']M'] = '@function.outer',
+        [']['] = '@class.outer',
+      },
+      goto_previous_start = {
+        ['[m'] = '@function.outer',
+        ['[['] = '@class.outer',
+      },
+      goto_previous_end = {
+        ['[M'] = '@function.outer',
+        ['[]'] = '@class.outer',
+      },
+    },
+    swap = {
+      enable = true,
+      swap_next = {
+        ['<leader>a'] = '@parameter.inner',
+      },
+      swap_previous = {
+        ['<leader>A'] = '@parameter.inner',
+      },
+    },
+  },
 }
 
 -- }}}
@@ -847,6 +905,63 @@ vim.keymap.set('n', '<leader>mo', builtin.vim_options, silent_opts)
 vim.keymap.set('n', '<leader>"', ":Telescope neoclip<cr>", silent_opts)
 
 vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
+
+-- Diagnostic keymaps
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
+vim.keymap.set('n', '<leader>d', vim.diagnostic.setloclist)
+
+
+-- LSP settings.
+--  This function gets run when an LSP connects to a particular buffer.
+local on_attach = function(_, bufnr)
+  -- NOTE: Remember that lua is a real programming language, and as such it is possible
+  -- to define small helper and utility functions so you don't have to repeat yourself
+  -- many times.
+  --
+  -- In this case, we create a function that lets us more easily define mappings specific
+  -- for LSP related items. It sets the mode, buffer and description for us each time.
+  local nmap = function(keys, func, desc)
+    if desc then
+      desc = 'LSP: ' .. desc
+    end
+
+    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+  end
+
+  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+
+  nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
+  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+  nmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
+  nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
+  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+
+  -- See `:help K` for why this keymap
+  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+
+  -- Lesser used LSP functionality
+  nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+  nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
+  nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
+  nmap('<leader>wl', function()
+    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+  end, '[W]orkspace [L]ist Folders')
+
+  -- Create a command `:Format` local to the LSP buffer
+  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
+    if vim.lsp.buf.format then
+      vim.lsp.buf.format()
+    elseif vim.lsp.buf.formatting then
+      vim.lsp.buf.formatting()
+    end
+  end, { desc = 'Format current buffer with LSP' })
+end
+
 -- }}}
 
 -- Make runtime files discoverable to the server {{{
