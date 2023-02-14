@@ -346,6 +346,7 @@ require('packer').startup(function(use)
   use {
     "AckslD/nvim-neoclip.lua",
     requires = {
+      {'kkharji/sqlite.lua', module = 'sqlite'},
       {'nvim-telescope/telescope.nvim'},
     },
   }
@@ -987,7 +988,8 @@ require('neoclip').setup({
   enable_macro_history = true,
   content_spec_column = false,
   on_select = {
-    move_to_front = false,
+    move_to_front = true,
+    close_telescope=true
   },
   on_paste = {
     set_reg = false,
@@ -1026,7 +1028,7 @@ require('neoclip').setup({
   },
 })
 
--- require('telescope').load_extension('neoclip')
+require('telescope').load_extension('neoclip')
 
 -- }}}
 
