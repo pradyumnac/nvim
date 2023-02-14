@@ -262,9 +262,12 @@ end
 require('packer').startup(function(use)
   -- Package manager {{{
   use 'wbthomason/packer.nvim'
-  use 'folke/neoconf.nvim'
+  -- use 'folke/neoconf.nvim' -- folder specific/global lsp configuraton
   use 'williamboman/mason.nvim'
   -- use 'dstein64/vim-startuptime'
+
+  -- mini.nvim : multiple tools => tool heavy,non unic like philosophy
+  -- use { 'echasnovski/mini.nvim', branch = 'stable' }
 
   -- Treesitter
   use {
@@ -314,7 +317,8 @@ require('packer').startup(function(use)
   -- Utilities
   use 'mhinz/vim-startify'
   use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.0',
+    'nvim-telescope/telescope.nvim',
+    tag = '0.1.0',
     requires = { {'nvim-lua/plenary.nvim'} }
   }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
@@ -327,17 +331,16 @@ require('packer').startup(function(use)
   use 'junegunn/vim-peekaboo' -- Show Refisters on "
   use 'nanotee/zoxide.vim'
   use 'akinsho/toggleterm.nvim' -- Distraction free
-  use 'junegunn/vim-easy-align' --  Align text
   use 'unblevable/quick-scope' --Char jump highlight
 
   use 'mechatroner/rainbow_csv'
-  -- use 'junegunn/goyo.vim'
   use 'ellisonleao/glow.nvim' -- Markdown
 
   -- Text Manipulation
   use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
   use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
-  -- use 'jiangmiao/auto-pairs'
+  use 'tommcdo/vim-lion' -- alignment : gl/gL action => glip=
+  use 'windwp/nvim-autopairs' --autopair
   use 'tpope/vim-surround' -- ysiw, ysaw ysa}
   use {
     "AckslD/nvim-neoclip.lua",
@@ -380,8 +383,10 @@ if is_bootstrap then
   -- }}}
 end
 
--- Config: Plugins {{{
-require("neoconf").setup()
+-- Config: Plugins => neoconf, autopairs,vim-lion {{{
+-- require("neoconf").setup()
+require("nvim-autopairs").setup {}
+vim.g.lion_squeeze_spaces = 1
 -- }}}
 
 -- Config: Statusline{{{
@@ -667,33 +672,6 @@ end,
 
 -- }}}
 
--- -- Config: Bufferline {{{
--- --
--- require("bufferline").setup({
---   options = {
---     diagnostics = "nvim_lsp",
---     separator_style = "thick",
---     diagnostics_indicator = function(_, _, diagnostics_dict)
---             local s = " "
---             for e, n in pairs(diagnostics_dict) do
---                     local sym = e == "error" and " "
---                             or (e == "warning" and " " or (e == "info" and " " or " "))
---                     s = s .. " " .. sym .. n
---             end
---             return s
---     end,
---     offsets = {
---             {
---                     filetype = "NvimTree",
---                     text = "Nvim Tree",
---                     highlight = "Directory",
---                     text_align = "left",
---             },
---     },
---   },
--- })
--- -- }}}
-
 -- Config: Telescope {{{
 -- https://github.com/nvim-telescope/telescope.nvim/blob/master/lua/telescope/mappings.lua 
 local actions = require'telescope.actions'
@@ -736,7 +714,7 @@ require("telescope").load_extension "file_browser"
 -- Config: Treesitter {{{
 require'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all"
-  ensure_installed = { "c", "lua", "rust", "python", "go"},
+  ensure_installed = { "c", "lua", "rust", "python", "go","json","jsonc"},
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
