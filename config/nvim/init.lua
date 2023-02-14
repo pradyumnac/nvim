@@ -181,7 +181,7 @@ endfunction
 -- Maps: Default {{{
 local silent_opts = { noremap = true, silent = true }
 local opts = { noremap = true, silent = false }
-local term_opts = { silent = true }
+-- local term_opts = { silent = true }
 local keymap = vim.api.nvim_set_keymap
 -- Modes
 --   normal_mode = "n",
@@ -262,9 +262,10 @@ end
 require('packer').startup(function(use)
   -- Package manager {{{
   use 'wbthomason/packer.nvim'
+  use 'lewis6991/impatient.nvim'
   -- use 'folke/neoconf.nvim' -- folder specific/global lsp configuraton
   use 'williamboman/mason.nvim'
-  -- use 'dstein64/vim-startuptime'
+  use 'dstein64/vim-startuptime'
 
   -- mini.nvim : multiple tools => tool heavy,non unic like philosophy
   -- use { 'echasnovski/mini.nvim', branch = 'stable' }
@@ -385,6 +386,7 @@ end
 
 -- Config: Plugins => neoconf, autopairs,vim-lion {{{
 -- require("neoconf").setup()
+require("impatient")
 require("nvim-autopairs").setup {}
 vim.g.lion_squeeze_spaces = 1
 -- }}}
@@ -470,8 +472,8 @@ local on_attach = function(_, bufnr)
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
   nmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
   nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+  nmap('<leader>yd', require('telescope.builtin').lsp_document_symbols, '[D]ocument S[y]mbols')
+  nmap('<leader>ys', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace S[y]mbols')
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
@@ -633,6 +635,151 @@ require('fidget').setup()
 
 -- }}}
 
+-- Config: DAP {{{
+require('dap-go').setup()
+
+require("nvim-dap-virtual-text").setup {
+    enabled = true,                        -- enable this plugin (the default)
+    enabled_commands = true,               -- create commands DapVirtualTextEnable, DapVirtualTextDisable, DapVirtualTextToggle, (DapVirtualTextForceRefresh for refreshing when debug adapter did not notify its termination)
+    highlight_changed_variables = true,    -- highlight changed values with NvimDapVirtualTextChanged, else always NvimDapVirtualText
+    highlight_new_as_changed = false,      -- highlight new variables in the same way as changed variables (if highlight_changed_variables)
+    show_stop_reason = true,               -- show stop reason when stopped for exceptions
+    commented = false,                     -- prefix virtual text with comment string
+    only_first_definition = true,          -- only show virtual text at first definition (if there are multiple)
+    all_references = false,                -- show virtual text on all all references of the variable (not only definitions)
+    filter_references_pattern = '<module', -- filter references (not definitions) pattern when all_references is activated (Lua gmatch pattern, default filters out Python modules)
+    -- experimental features:
+    virt_text_pos = 'eol',                 -- position of virtual text, see `:h nvim_buf_set_extmark()`
+    all_frames = false,                    -- show virtual text for all stack frames not only current. Only works for debugpy on my machine.
+    virt_lines = false,                    -- show virtual lines instead of virtual text (will flicker!)
+    virt_text_win_col = nil                -- position the virtual text at a fixed window column (starting from the first text column) ,
+                                           -- e.g. 80 to position at column 80, see `:h nvim_buf_set_extmark()`
+}
+
+require("dapui").setup({
+  icons = { expanded = "", collapsed = "", current_frame = "" },
+  mappings = {
+    -- Use a table to apply multiple mappings
+    expand = { "<CR>", "<2-LeftMouse>" },
+    open = "o",
+    remove = "d",
+    edit = "e",
+    repl = "r",
+    toggle = "t",
+  },
+  -- Use this to override mappings for specific elements
+  element_mappings = {
+    -- Example:
+    -- stacks = {
+    --   open = "<CR>",
+    --   expand = "o",
+    -- }
+  },
+  -- Expand lines larger than the window
+  -- Requires >= 0.7
+  expand_lines = vim.fn.has("nvim-0.7") == 1,
+  -- Layouts define sections of the screen to place windows.
+  -- The position can be "left", "right", "top" or "bottom".
+  -- The size specifies the height/width depending on position. It can be an Int
+  -- or a Float. Integer specifies height/width directly (i.e. 20 lines/columns) while
+  -- Float value specifies percentage (i.e. 0.3 - 30% of available lines/columns)
+  -- Elements are the elements shown in the layout (in order).
+  -- Layouts are opened in order so that earlier layouts take priority in window sizing.
+  layouts = {
+    {
+      elements = {
+      -- Elements can be strings or table with id and size keys.
+        { id = "scopes", size = 0.25 },
+        "breakpoints",
+        "stacks",
+        "watches",
+      },
+      size = 40, -- 40 columns
+      position = "left",
+    },
+    {
+      elements = {
+        "repl",
+        "console",
+      },
+      size = 0.25, -- 25% of total lines
+      position = "bottom",
+    },
+  },
+  controls = {
+    -- Requires Neovim nightly (or 0.8 when released)
+    enabled = true,
+    -- Display controls in this element
+    element = "repl",
+    icons = {
+      pause = "",
+      play = "",
+      step_into = "",
+      step_over = "",
+      step_out = "",
+      step_back = "",
+      run_last = "",
+      terminate = "",
+    },
+  },
+  floating = {
+    max_height = nil, -- These can be integers or a float between 0 and 1.
+    max_width = nil, -- Floats will be treated as percentage of your screen.
+    border = "single", -- Border style. Can be "single", "double" or "rounded"
+    mappings = {
+      close = { "q", "<Esc>" },
+    },
+  },
+  windows = { indent = 1 },
+  render = {
+    max_type_length = nil, -- Can be integer or nil.
+    max_value_lines = 100, -- Can be integer or nil.
+  }
+})
+
+local dap, dapui = require("dap"), require("dapui")
+dap.listeners.after.event_initialized["dapui_config"] = function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated["dapui_config"] = function()
+  dapui.close()
+end
+dap.listeners.before.event_exited["dapui_config"] = function()
+  dapui.close()
+end
+
+-- ################## Go
+require('dap-go').setup {
+  -- Additional dap configurations can be added.
+  -- dap_configurations accepts a list of tables where each entry
+  -- represents a dap configuration. For more details do:
+  -- :help dap-configuration
+  dap_configurations = {
+    {
+      -- Must be "go" or it will be ignored by the plugin
+      type = "go",
+      name = "Attach remote",
+      mode = "remote",
+      request = "attach",
+    },
+  },
+  -- delve configurations
+  delve = {
+    -- time to wait for delve to initialize the debug session.
+    -- default to 20 seconds
+    initialize_timeout_sec = 20,
+    -- a string that defines the port to start delve debugger.
+    -- default to string "${port}" which instructs nvim-dap
+    -- to start the process in a random available port
+    port = "${port}"
+  },
+}
+
+-- ####################Python
+require('dap-python').setup()
+-- lua require('dap-python').test_runner = 'pytest' -- optional
+-- }}}
+
 -- Config: Terminal {{{ 
 require("toggleterm").setup({
   -- size can be a number or function which is passed the current terminal
@@ -653,7 +800,7 @@ end,
   -- direction = 'vertical' | 'horizontal' | 'window' | 'float',
   direction = "float",
   close_on_exit = true, -- close the terminal window when the process exits
-  shell = bash, -- change the default shell
+  shell = "bash", -- change the default shell
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
     -- The border key is *almost* the same as 'nvim_open_win'
@@ -737,7 +884,7 @@ require'nvim-treesitter.configs'.setup {
     -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
     -- the name of the parser)
     -- list of language that will be disabled
-    disable = { "c", "rust" },
+    -- disable = { "c", "rust" },
     -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
     disable = function(lang, buf)
       local max_filesize = 100 * 1024 -- 100 KB
@@ -892,47 +1039,43 @@ keymap("n","<leader>tg", ":ToggleTerm<cr>", silent_opts)
 keymap("n","<leader>tt", ":ToggleTerm<cr>", silent_opts)
 keymap("n","<leader>tf", ":ToggleTerm<cr>", silent_opts)
 function _G.set_terminal_keymaps()
-  local opts = {buffer = 0}
-  vim.keymap.set('t', '<F4>', [[<esc><C-\><C-n>]], opts)
-  vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
-  vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
-  vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
-  vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
-  vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
-  vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
+  local t_opts = {buffer = 0}
+  vim.keymap.set('t', '<F4>', [[<esc><C-\><C-n>]], t_opts)
+  vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], t_opts)
+  vim.keymap.set('t', 'jk', [[<C-\><C-n>]], t_opts)
+  vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], t_opts)
+  vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], t_opts)
+  vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], t_opts)
+  vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], t_opts)
 end
 -- if you only want these mappings for toggle term use term://*toggleterm#* instead
 vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
 -- telescope
-local builtin = require('telescope.builtin')
-local find_files_no_ignore = function()
-  builtin.find_files({
-    no_ignore = true
-  })
-end
-vim.keymap.set('n', '<leader>-', find_files_no_ignore, silent_opts) -- non hidden files
-vim.keymap.set('n', '<leader>=', builtin.find_files, silent_opts) --git checked in file
-vim.keymap.set('n', '<leader>,', builtin.git_commits, silent_opts)
-vim.keymap.set('n', '<leader>.', builtin.oldfiles, silent_opts)
-vim.keymap.set('n', '<leader>/', builtin.live_grep, silent_opts)
-vim.keymap.set('n', '<leader>:', builtin.current_buffer_fuzzy_find, silent_opts)
-vim.keymap.set('n', '<leader>;', builtin.buffers, silent_opts)
-vim.keymap.set('n', '<leader>\\', builtin.help_tags, silent_opts)
+local builtin              = require('telescope.builtin')
+local find_files_no_ignore = function() builtin.find_files({no_ignore = true}) end
+vim.keymap.set('n', '<leader>-' , find_files_no_ignore             , silent_opts) -- non hidden files
+vim.keymap.set('n', '<leader>=' , builtin.find_files               , silent_opts) --git checked in file
+vim.keymap.set('n', '<leader>,'  , builtin.git_commits              , silent_opts)
+vim.keymap.set('n', '<leader>.' , builtin.oldfiles                 , silent_opts)
+vim.keymap.set('n', '<leader>/' , builtin.live_grep                , silent_opts)
+vim.keymap.set('n', '<leader>:' , builtin.current_buffer_fuzzy_find, silent_opts)
+vim.keymap.set('n', '<leader>;' , builtin.buffers                  , silent_opts)
+vim.keymap.set('n', '<leader>\\', builtin.help_tags                , silent_opts)
 
 --others
 vim.keymap.set('n', '<leader>mq', builtin.quickfix, silent_opts)
 keymap('n', '<leader>ms', ':SearchSession<cr>', silent_opts)
 
 -- help
-vim.keymap.set('n', '<leader>mt', builtin.treesitter, silent_opts)
-vim.keymap.set('n', '<leader>mh', builtin.help_tags, silent_opts)
-vim.keymap.set('n', '<leader>mm', builtin.keymaps, silent_opts)
-vim.keymap.set('n', '<leader>ml', builtin.keymaps, silent_opts)
-vim.keymap.set('n', '<leader>mk', builtin.keymaps, silent_opts)
-vim.keymap.set('n', '<leader>mc', builtin.commands, silent_opts)
-vim.keymap.set('n', '<leader>mo', builtin.vim_options, silent_opts)
-vim.keymap.set('n', '<leader>"', ":Telescope neoclip<cr>", silent_opts)
+vim.keymap.set('n', '<leader>mt', builtin.treesitter      , silent_opts)
+vim.keymap.set('n', '<leader>mh', builtin.help_tags       , silent_opts)
+vim.keymap.set('n', '<leader>mm', builtin.keymaps         , silent_opts)
+vim.keymap.set('n', '<leader>ml', builtin.keymaps         , silent_opts)
+vim.keymap.set('n', '<leader>mk', builtin.keymaps         , silent_opts)
+vim.keymap.set('n', '<leader>mc', builtin.commands        , silent_opts)
+vim.keymap.set('n', '<leader>mo', builtin.vim_options     , silent_opts)
+vim.keymap.set('n', '<leader>"' , ":Telescope neoclip<cr>", silent_opts)
 
 vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
 
@@ -940,17 +1083,33 @@ vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
-vim.keymap.set('n', '<leader>d', vim.diagnostic.setloclist)
+vim.keymap.set('n', '<leader>l', vim.diagnostic.setloclist)
 
-
+-- Maps: DAP {{{
+-- Already defined in config
+-- local dap    = require('dap')
+-- local dapui  = require('dapui')
+local dapgo     = require('dap-go')
+local dappython = require('dap-python')
+vim.keymap.set("n", "<leader>ds", dap.continue, silent_opts)
+vim.keymap.set("n", "<leader>dq", dap.terminate, silent_opts)
+vim.keymap.set("n", "<leader>dQ", dapui.close, silent_opts)
+vim.keymap.set("n", "<leader>do", dap.step_over, silent_opts)
+vim.keymap.set("n", "<leader>di", dap.step_into, silent_opts)
+vim.keymap.set("n", "<leader>dO", dap.step_out, silent_opts)
+vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, silent_opts)
+vim.keymap.set("n", "<leader>dr", dap.repl.open, silent_opts)
+vim.keymap.set("n", "<leader>dt", dapgo.debug_test, silent_opts)
+vim.keymap.set("n", "<leader>dm", dappython.test_method, silent_opts)
+vim.keymap.set("n", "<leader>dc", dappython.test_class, silent_opts)
+vim.keymap.set("v", "<leader>dv", dappython.debug_selection, silent_opts)
+-- vnoremap <silent> <leader>dv <ESC>:lua require('dap-python').debug_selection()<CR>
+vim.keymap.set("n", "<leader>dB", function () dap.set_breakpoint(vim.fn.input('Breakpoint condition: ')) end, silent_opts)
+vim.keymap.set("n", "<leader>dlp", function () dap.set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end, silent_opts)
+-- }}}
 
 -- }}}
 
--- Make runtime files discoverable to the server {{{
-local runtime_path = vim.split(package.path, ';')
-table.insert(runtime_path, 'lua/?.lua')
-table.insert(runtime_path, 'lua/?/init.lua')
--- }}}
 
 vim.cmd [[colorscheme gruvbox]]
 --https://github.com/arnvald/viml-to-lua
