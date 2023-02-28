@@ -1032,6 +1032,27 @@ require('telescope').load_extension('neoclip')
 
 -- }}}
 
+-- Config: Vim-Go {{{
+-- let g:go_debug_windows = {
+--       \ 'vars':  'leftabove 35vnew',
+--       \ 'stack': 'botright 10new',
+--       \ }
+vim.g.go_test_show_name = 1
+vim.g.go_list_type = "quickfix"
+vim.g.go_autodetect_gopath = 1
+vim.g.go_gopls_complete_unimported = 1
+vim.g.go_gopls_gofumpt = 1
+-- 2 is for errors and warnings
+vim.g.go_diagnostics_level = 2 
+vim.g.go_doc_popup_window = 1
+vim.g.go_doc_balloon = 1
+vim.g.go_imports_mode="gopls"
+vim.g.go_imports_autosave=1
+vim.g.go_highlight_build_constraints = 1
+vim.g.go_highlight_operators = 1
+-- vim.g.go_fold_enable = []
+-- }}}
+
 -- Maps: Plugins {{{
 keymap("n","<F3>", ":MundoToggle<cr>", silent_opts)
 
@@ -1112,6 +1133,37 @@ vim.keymap.set("n", "<leader>dlp", function () dap.set_breakpoint(nil, nil, vim.
 
 -- }}}
 
+-- Maps: Vim-Go [Disabled] {{{
+-- ## AUTOCOMD conflicts with nvim_cmd
+-- vim.cmd([[
+-- augroup go
+--     autocmd!
+--
+--     autocmd FileType go nmap <silent> <Leader>gv <Plug>(go-def-vertical)
+--     autocmd FileType go nmap <silent> <Leader>gs <Plug>(go-def-split)
+--     autocmd FileType go nmap <silent> <Leader>gw <Plug>(go-def-tab)
+--
+--     autocmd FileType go nmap <silent> <Leader>gi <Plug>(go-doc)
+--
+--     autocmd FileType go nmap <silent> <leader>gb :<C-u>call <SID>build_go_files()<CR>
+--     autocmd FileType go nmap <silent><Leader>gr <Plug> (go-run)
+--     autocmd FileType go nmap <silent> <leader>gt  <Plug>(go-test)
+--     autocmd FileType go nmap <silent> <Leader>gc <Plug>(go-coverage-toggle)
+--
+--     autocmd FileType go nmap <silent> <C-g> :GoDecls<cr>
+--     autocmd FileType go imap <silent> <C-g> <esc>:<C-u>GoDecls<cr>
+--     autocmd FileType go map <silent> <Leader>gn :cnext<CR>
+--     autocmd FileType go map <silent> <Leader>gp :cprevious<CR>
+--     autocmd FileType go nnoremap <silent> <Leader>gx :cclose<CR>
+--
+--     " Fatih: I like these more!
+--     " autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+--     " autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+--     " autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+--     " autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+-- augroup END
+-- ]])
+-- }}}
 
 vim.cmd [[colorscheme gruvbox]]
 --https://github.com/arnvald/viml-to-lua
