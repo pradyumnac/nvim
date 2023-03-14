@@ -430,7 +430,7 @@ vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
 -- Config: Mason-Lspconfig {{{
 -- lua fails over and over in armv8l - not available for arch
 require("mason-lspconfig").setup {
-    ensure_installed = { "gopls", "pyright" },
+    ensure_installed = { "lua_ls", "gopls", "pyright" },
   automatic_installation=true
 }
 -- }}}
@@ -504,29 +504,28 @@ end
 -- Add additional capabilities supported by nvim-cmp
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local lspconfig = require('lspconfig')
--- Enable sumneklpo lua for nvim
-require'lspconfig'.sumneko_lua.setup {
-    -- ... other configs
-    settings = {
-      Lua = {
-        runtime = {
+
+require'lspconfig'.lua_ls.setup {
+  settings = {
+    Lua = {
+      runtime = {
         -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
         version = 'LuaJIT',
-        },
-        diagnostics = {
-          -- Get the language server to recognize the `vim` global
-          globals = {'vim'},
-        },
-        workspace = {
-          -- Make the server aware of Neovim runtime files
-          library = vim.api.nvim_get_runtime_file("", true),
-        },
-        -- Do not send telemetry data containing a randomized but unique identifier
-        telemetry = {
-          enable = false,
-        },
-      }
-    }
+      },
+      diagnostics = {
+        -- Get the language server to recognize the `vim` global
+        globals = {'vim'},
+      },
+      workspace = {
+        -- Make the server aware of Neovim runtime files
+        library = vim.api.nvim_get_runtime_file("", true),
+      },
+      -- Do not send telemetry data containing a randomized but unique identifier
+      telemetry = {
+        enable = false,
+      },
+    },
+  },
 }
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
