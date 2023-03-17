@@ -429,10 +429,10 @@ vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
 
 -- Config: Mason-Lspconfig {{{
 -- lua fails over and over in armv8l - not available for arch
-require("mason-lspconfig").setup {
-    ensure_installed = { "lua_ls", "gopls", "pyright" },
-  automatic_installation=true
-}
+-- require("mason-lspconfig").setup {
+--     ensure_installed = { "lua_ls", "gopls", "pyright" },
+--   automatic_installation=true
+-- }
 -- }}}
 
 -- Config: Mason {{{
@@ -519,6 +519,7 @@ require'lspconfig'.lua_ls.setup {
       workspace = {
         -- Make the server aware of Neovim runtime files
         library = vim.api.nvim_get_runtime_file("", true),
+        checkThirdParty = false,
       },
       -- Do not send telemetry data containing a randomized but unique identifier
       telemetry = {
