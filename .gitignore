@@ -2,3 +2,4 @@ data
 .cache
 packer_compiled.lua
 config/fish
+.DS_Store

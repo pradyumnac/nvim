@@ -266,6 +266,7 @@ require('packer').startup(function(use)
   -- use 'folke/neoconf.nvim' -- folder specific/global lsp configuraton
   use 'williamboman/mason.nvim'
   use 'dstein64/vim-startuptime'
+  -- use 'github/copilot.vim'
 
   -- mini.nvim : multiple tools => tool heavy,non unic like philosophy
   -- use { 'echasnovski/mini.nvim', branch = 'stable' }
@@ -390,6 +391,19 @@ end
 require("impatient")
 require("nvim-autopairs").setup {}
 vim.g.lion_squeeze_spaces = 1
+vim.g.copilot_no_tab_map = true
+-- vim.g.copilot_filetypes = {
+--     ["*"] = false,
+--     ["javascript"] = true,
+--     ["typescript"] = true,
+--     ["lua"] = false,
+--     ["rust"] = true,
+--     ["c"] = true,
+--     ["c#"] = true,
+--     ["c++"] = true,
+--     ["go"] = true,
+--     ["python"] = true,
+-- }
 -- }}}
 
 -- Config: Statusline{{{
@@ -1167,3 +1181,5 @@ vim.keymap.set("n", "<leader>dlp", function () dap.set_breakpoint(nil, nil, vim.
 
 vim.cmd [[colorscheme gruvbox]]
 --https://github.com/arnvald/viml-to-lua
+
+vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
