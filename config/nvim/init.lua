@@ -284,15 +284,15 @@ require('packer').startup(function(use)
     end
   }
 
-  -- use {
-  --   "folke/which-key.nvim",
-  --   config = function()
-  --     vim.o.timeout = true
-  --     vim.o.timeoutlen = 300
-  --     require("which-key").setup {
-  --     }
-  --   end
-  -- }
+  use {
+    "folke/which-key.nvim",
+    config = function()
+      vim.o.timeout = true
+      vim.o.timeoutlen = 300
+      require("which-key").setup {
+      }
+    end
+  }
 
   -- Treesitter
   use {
@@ -1186,7 +1186,6 @@ keymap('n', '<leader>ms', ':SearchSession<cr>', silent_opts)
 vim.keymap.set('n', '<leader>mt', builtin.treesitter      , silent_opts)
 vim.keymap.set('n', '<leader>mh', builtin.help_tags       , silent_opts)
 vim.keymap.set('n', '<leader>mm', builtin.keymaps         , silent_opts)
--- vim.keymap.set('n', '<C-/>', builtin.keymaps         , silent_opts)
 vim.keymap.set('n', '<leader>mk', builtin.keymaps         , silent_opts)
 vim.keymap.set('n', '<leader>mc', builtin.commands        , silent_opts)
 vim.keymap.set('n', '<leader>mo', builtin.vim_options     , silent_opts)
@@ -1198,6 +1197,9 @@ vim.keymap.set("n","<leader>fd", ":Telescope oldfiles<cr>", silent_opts)
 -- nvim-tree keymap
 vim.api.nvim_set_keymap("n", "<leader>fe", ":NvimTreeToggle<cr>", silent_opts)
 -- https://github.com/nvim-tree/nvim-tree.lua/wiki/Recipes
+
+-- Which key 
+vim.keymap.set('n', '<C-/>', ':WhichKey<cr>', silent_opts)
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
