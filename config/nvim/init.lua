@@ -13,6 +13,12 @@ vim.o.encoding = "utf-8"
 vim.o.shell = "bash"
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+-- disable netrw at the very start (For nvim-tree)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- set termguicolors to enable highlight groups
+vim.opt.termguicolors = true
 
 -- Config: [[ Setting options ]] {{{
 
@@ -103,77 +109,77 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 vim.cmd([[
 function! MinExec(cmd)
-	redir @a
-	exec printf('silent %s',a:cmd)
-	redir END
-	return @a
+redir @a
+exec printf('silent %s',a:cmd)
+redir END
+return @a
 endfunction
 function! GetLeaderMappings()
-	let lines=MinExec('map <space>')
-	" let lines=system("rg '<leader>' ~/repos/nvim -N -I|sed 's/^[ ]*//g'|sed 's/^.*<leader>//g'|sort -r")
-	let lines=split(lines,'\n')
-	return lines
+let lines=MinExec('map <space>')
+" let lines=system("rg '<leader>' ~/repos/nvim -N -I|sed 's/^[ ]*//g'|sed 's/^.*<leader>//g'|sort -r")
+let lines=split(lines,'\n')
+return lines
 endfunction
 function! GetMappings()
-	let lines=MinExec('map')
-	let lines=split(lines,'\n')
-	return lines
+let lines=MinExec('map')
+let lines=split(lines,'\n')
+return lines
 endfunction
 function! RenameFile()
-    let old_name = expand('%')
-    let new_name = input('New file name: ', expand('%'), 'file')
-    if new_name != '' && new_name != old_name
-        exec ':saveas ' . new_name
-        exec ':silent !rm ' . old_name
-        redraw!
-    endif
+let old_name = expand('%')
+let new_name = input('New file name: ', expand('%'), 'file')
+if new_name != '' && new_name != old_name
+exec ':saveas ' . new_name
+exec ':silent !rm ' . old_name
+redraw!
+endif
 endfunction
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
-    let l:file = expand('%')
-    if l:file =~# '^\f\+_test\.go$'
-        call go#test#Test(0, 1)
-    elseif l:file =~# '^\f\+\.go$'
-        call go#cmd#Build(0)
-    endif
+let l:file = expand('%')
+if l:file =~# '^\f\+_test\.go$'
+call go#test#Test(0, 1)
+elseif l:file =~# '^\f\+\.go$'
+call go#cmd#Build(0)
+endif
 endfunction
 " Merge a tab into a split in the previous window
 function! MergeTabs()
-    if tabpagenr() == 1
-        return
-    endif
-    let bufferName = bufname("%")
-    if tabpagenr("$") == tabpagenr()
-        close!
-    else
-        close!
-        tabprev
-    endif
-    split
-    execute "buffer " . bufferName
+if tabpagenr() == 1
+return
+endif
+let bufferName = bufname("%")
+if tabpagenr("$") == tabpagenr()
+close!
+else
+close!
+tabprev
+endif
+split
+execute "buffer " . bufferName
 endfunction
 function! CheckBackspace() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
+let col = col('.') - 1
+return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 function! ShowDocumentation()
-  if CocAction('hasProvider', 'hover')
-    call CocActionAsync('doHover')
-  else
-    call feedkeys('K', 'in')
-  endif
+if CocAction('hasProvider', 'hover')
+call CocActionAsync('doHover')
+else
+call feedkeys('K', 'in')
+endif
 endfunction
 function! NumberToggle()
-    if(&relativenumber == 1)
-        set norelativenumber
-        set number
-    else
-        set relativenumber
-    endif
+if(&relativenumber == 1)
+set norelativenumber
+set number
+else
+set relativenumber
+endif
 endfunction
 function! AdjustFontSize(amount)
-    let s:fontsize = s:fontsize+a:amount
-    :execute "GuiFont! Consolas:h" . s:fontsize
+let s:fontsize = s:fontsize+a:amount
+:execute "GuiFont! Consolas:h" . s:fontsize
 endfunction
 ]])
 -- }}}
@@ -266,10 +272,27 @@ require('packer').startup(function(use)
   -- use 'folke/neoconf.nvim' -- folder specific/global lsp configuraton
   use 'williamboman/mason.nvim'
   use 'dstein64/vim-startuptime'
-  -- use 'github/copilot.vim'
+  use 'github/copilot.vim'
 
-  -- mini.nvim : multiple tools => tool heavy,non unic like philosophy
-  -- use { 'echasnovski/mini.nvim', branch = 'stable' }
+  use {
+    'nvim-tree/nvim-tree.lua',
+    requires = {
+      'nvim-tree/nvim-web-devicons', -- optional
+    },
+    config = function()
+      require("nvim-tree").setup {}
+    end
+  }
+
+  -- use {
+  --   "folke/which-key.nvim",
+  --   config = function()
+  --     vim.o.timeout = true
+  --     vim.o.timeoutlen = 300
+  --     require("which-key").setup {
+  --     }
+  --   end
+  -- }
 
   -- Treesitter
   use {
@@ -418,6 +441,61 @@ require('lualine').setup {
 }
 -- }}}
 
+-- Config: Nvim-Tree {{{
+require("nvim-tree").setup({
+  sort_by = "case_sensitive",
+  view = {
+    width = 30,
+    icons = {
+      webdev_colors = true,
+      git_placement = "before",
+      modified_placement = "after",
+      padding = " ",
+      symlink_arrow = " ➛ ",
+      show = {
+        file = true,
+        folder = true,
+        folder_arrow = true,
+        git = true,
+        modified = true,
+      },
+      glyphs = {
+        default = "",
+        symlink = "",
+        bookmark = "",
+        modified = "●",
+        folder = {
+          arrow_closed = "",
+          arrow_open = "",
+          default = "",
+          open = "",
+          empty = "",
+          empty_open = "",
+          symlink = "",
+          symlink_open = "",
+        },
+        git = {
+          unstaged = "✗",
+          staged = "✓",
+          unmerged = "",
+          renamed = "➜",
+          untracked = "★",
+          deleted = "",
+          ignored = "◌",
+        },
+      },
+    },
+  },
+  renderer = {
+    group_empty = true,
+  },
+  filters = {
+    dotfiles = true,
+  },
+
+})
+-- }}}
+
 -- Config: Comment{{{
 require('Comment').setup()
 -- }}}
@@ -451,13 +529,13 @@ vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
 
 -- Config: Mason {{{
 require("mason").setup({
-    ui = {
-        icons = {
-            package_installed = "✓",
-            package_pending = "➜",
-            package_uninstalled = "✗"
-        }
+  ui = {
+    icons = {
+      package_installed = "✓",
+      package_pending = "➜",
+      package_uninstalled = "✗"
     }
+  }
 })
 
 -- }}}
@@ -575,8 +653,8 @@ cmp.setup {
     ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
-      -- You could replace the expand_or_jumpable() calls with expand_or_locally_jumpable() 
-      -- they way you will only jump inside the snippet region
+        -- You could replace the expand_or_jumpable() calls with expand_or_locally_jumpable() 
+        -- they way you will only jump inside the snippet region
       elseif luasnip.expand_or_jumpable() then
         luasnip.expand_or_jump()
       elseif has_words_before() then
@@ -604,38 +682,38 @@ cmp.setup {
 
 local types = require("luasnip.util.types")
 luasnip.setup({
-	history = true,
-	-- Update more often, :h events for more info.
-	update_events = "TextChanged,TextChangedI",
-	-- Snippets aren't automatically removed if their text is deleted.
-	-- `delete_check_events` determines on which events (:h events) a check for
-	-- deleted snippets is performed.
-	-- This can be especially useful when `history` is enabled.
-	delete_check_events = "TextChanged",
-	ext_opts = {
-		[types.choiceNode] = {
-			active = {
-				virt_text = { { "choiceNode", "Comment" } },
-			},
-		},
-	},
-	-- treesitter-hl has 100, use something higher (default is 200).
-	ext_base_prio = 300,
-	-- minimal increase in priority.
-	ext_prio_increase = 1,
-	enable_autosnippets = true,
-	-- mapping for cutting selected text so it's usable as SELECT_DEDENT,
-	-- SELECT_RAW or TM_SELECTED_TEXT (mapped via xmap).
-	store_selection_keys = "<Tab>",
-	-- luasnip uses this function to get the currently active filetype. This
-	-- is the (rather uninteresting) default, but it's possible to use
-	-- eg. treesitter for getting the current filetype by setting ft_func to
-	-- require("luasnip.extras.filetype_functions").from_cursor (requires
-	-- `nvim-treesitter/nvim-treesitter`). This allows correctly resolving
-	-- the current filetype in eg. a markdown-code block or `vim.cmd()`.
-	ft_func = function()
-		return vim.split(vim.bo.filetype, ".", true)
-	end,
+  history = true,
+  -- Update more often, :h events for more info.
+  update_events = "TextChanged,TextChangedI",
+  -- Snippets aren't automatically removed if their text is deleted.
+  -- `delete_check_events` determines on which events (:h events) a check for
+  -- deleted snippets is performed.
+  -- This can be especially useful when `history` is enabled.
+  delete_check_events = "TextChanged",
+  ext_opts = {
+    [types.choiceNode] = {
+      active = {
+        virt_text = { { "choiceNode", "Comment" } },
+      },
+    },
+  },
+  -- treesitter-hl has 100, use something higher (default is 200).
+  ext_base_prio = 300,
+  -- minimal increase in priority.
+  ext_prio_increase = 1,
+  enable_autosnippets = true,
+  -- mapping for cutting selected text so it's usable as SELECT_DEDENT,
+  -- SELECT_RAW or TM_SELECTED_TEXT (mapped via xmap).
+  store_selection_keys = "<Tab>",
+  -- luasnip uses this function to get the currently active filetype. This
+  -- is the (rather uninteresting) default, but it's possible to use
+  -- eg. treesitter for getting the current filetype by setting ft_func to
+  -- require("luasnip.extras.filetype_functions").from_cursor (requires
+  -- `nvim-treesitter/nvim-treesitter`). This allows correctly resolving
+  -- the current filetype in eg. a markdown-code block or `vim.cmd()`.
+  ft_func = function()
+    return vim.split(vim.bo.filetype, ".", true)
+  end,
 })
 -- luasnip.snippets=require("luasnip-snippets").load_snippets()
 require("luasnip.loaders.from_vscode").lazy_load()
@@ -654,21 +732,21 @@ require('fidget').setup()
 require('dap-go').setup()
 
 require("nvim-dap-virtual-text").setup {
-    enabled = true,                        -- enable this plugin (the default)
-    enabled_commands = true,               -- create commands DapVirtualTextEnable, DapVirtualTextDisable, DapVirtualTextToggle, (DapVirtualTextForceRefresh for refreshing when debug adapter did not notify its termination)
-    highlight_changed_variables = true,    -- highlight changed values with NvimDapVirtualTextChanged, else always NvimDapVirtualText
-    highlight_new_as_changed = false,      -- highlight new variables in the same way as changed variables (if highlight_changed_variables)
-    show_stop_reason = true,               -- show stop reason when stopped for exceptions
-    commented = false,                     -- prefix virtual text with comment string
-    only_first_definition = true,          -- only show virtual text at first definition (if there are multiple)
-    all_references = false,                -- show virtual text on all all references of the variable (not only definitions)
-    filter_references_pattern = '<module', -- filter references (not definitions) pattern when all_references is activated (Lua gmatch pattern, default filters out Python modules)
-    -- experimental features:
-    virt_text_pos = 'eol',                 -- position of virtual text, see `:h nvim_buf_set_extmark()`
-    all_frames = false,                    -- show virtual text for all stack frames not only current. Only works for debugpy on my machine.
-    virt_lines = false,                    -- show virtual lines instead of virtual text (will flicker!)
-    virt_text_win_col = nil                -- position the virtual text at a fixed window column (starting from the first text column) ,
-                                           -- e.g. 80 to position at column 80, see `:h nvim_buf_set_extmark()`
+  enabled = true,                        -- enable this plugin (the default)
+  enabled_commands = true,               -- create commands DapVirtualTextEnable, DapVirtualTextDisable, DapVirtualTextToggle, (DapVirtualTextForceRefresh for refreshing when debug adapter did not notify its termination)
+  highlight_changed_variables = true,    -- highlight changed values with NvimDapVirtualTextChanged, else always NvimDapVirtualText
+  highlight_new_as_changed = false,      -- highlight new variables in the same way as changed variables (if highlight_changed_variables)
+  show_stop_reason = true,               -- show stop reason when stopped for exceptions
+  commented = false,                     -- prefix virtual text with comment string
+  only_first_definition = true,          -- only show virtual text at first definition (if there are multiple)
+  all_references = false,                -- show virtual text on all all references of the variable (not only definitions)
+  filter_references_pattern = '<module', -- filter references (not definitions) pattern when all_references is activated (Lua gmatch pattern, default filters out Python modules)
+  -- experimental features:
+  virt_text_pos = 'eol',                 -- position of virtual text, see `:h nvim_buf_set_extmark()`
+  all_frames = false,                    -- show virtual text for all stack frames not only current. Only works for debugpy on my machine.
+  virt_lines = false,                    -- show virtual lines instead of virtual text (will flicker!)
+  virt_text_win_col = nil                -- position the virtual text at a fixed window column (starting from the first text column) ,
+  -- e.g. 80 to position at column 80, see `:h nvim_buf_set_extmark()`
 }
 
 require("dapui").setup({
@@ -703,7 +781,7 @@ require("dapui").setup({
   layouts = {
     {
       elements = {
-      -- Elements can be strings or table with id and size keys.
+        -- Elements can be strings or table with id and size keys.
         { id = "scopes", size = 0.25 },
         "breakpoints",
         "stacks",
@@ -804,8 +882,8 @@ require("toggleterm").setup({
       return 20
     elseif term.direction == "vertical" then
       return vim.o.columns * 0.4
-end
-end,
+    end
+  end,
   hide_numbers = false, -- hide the number column in toggleterm buffers
   shade_filetypes = {},
   shade_terminals = true,
@@ -819,16 +897,16 @@ end,
   -- This field is only relevant if direction is set to 'float'
   float_opts = {
     -- The border key is *almost* the same as 'nvim_open_win'
--- see :h nvim_open_win for details on borders however
+    -- see :h nvim_open_win for details on borders however
     -- the 'curved' border is a custom border type
--- not natively supported but implemented in this plugin.
--- border = 'single' | 'double' | 'shadow' | 'curved' | ... other options supported by win open
-          border = "curved",
-          winblend = 3,
-          highlights = {
-                  border = "Normal",
-                  background = "Normal",
-          },
+    -- not natively supported but implemented in this plugin.
+    -- border = 'single' | 'double' | 'shadow' | 'curved' | ... other options supported by win open
+    border = "curved",
+    winblend = 3,
+    highlights = {
+      border = "Normal",
+      background = "Normal",
+    },
   },
 })
 
@@ -838,33 +916,33 @@ end,
 -- https://github.com/nvim-telescope/telescope.nvim/blob/master/lua/telescope/mappings.lua 
 local actions = require'telescope.actions'
 require('telescope').setup{
-	defaults = {
-		mappings = {
-			i = {
-			    ["<esc>"] = actions.close,
-			    ["<tab>"] = actions.add_selection,
-			    ["<cr>"] = actions.select_tab,
-			    ["<C-t>"] = actions.select_default,
-			},
-			n = {
-			    ["<esc>"] = actions.close,
-			    ["<tab>"] = actions.add_selection,
-			    ["<cr>"] = actions.select_tab,
-			    ["<C-t>"] = actions.select_default,
-			},
-		},
-	},
-	extensions = {
-		file_browser = {
-      		theme = "ivy",
-      		-- disables netrw and use telescope-file-browser in its place
-      		hijack_netrw = true,
-	      	mappings = {
-			["i"] = {},
-			["n"] = {},
-	      	},
-    		},
-  	},
+  defaults = {
+    mappings = {
+      i = {
+        ["<esc>"] = actions.close,
+        ["<tab>"] = actions.add_selection,
+        ["<cr>"] = actions.select_tab,
+        ["<C-t>"] = actions.select_default,
+      },
+      n = {
+        ["<esc>"] = actions.close,
+        ["<tab>"] = actions.add_selection,
+        ["<cr>"] = actions.select_tab,
+        ["<C-t>"] = actions.select_default,
+      },
+    },
+  },
+  extensions = {
+    file_browser = {
+      theme = "ivy",
+      -- disables netrw and use telescope-file-browser in its place
+      hijack_netrw = true,
+      mappings = {
+        ["i"] = {},
+        ["n"] = {},
+      },
+    },
+  },
 }
 
 require("telescope").load_extension "file_browser"
@@ -905,9 +983,9 @@ require'nvim-treesitter.configs'.setup {
       local max_filesize = 100 * 1024 -- 100 KB
       local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
       if ok and stats and stats.size > max_filesize then
-return true
+        return true
       end
-end,
+    end,
 
     -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
     -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
@@ -1035,9 +1113,9 @@ require('neoclip').setup({
     },
     fzf = {
       select = 'default',
-        paste = 'ctrl-p',
-        paste_behind = 'ctrl-k',
-        custom = {},
+      paste = 'ctrl-p',
+      paste_behind = 'ctrl-k',
+      custom = {},
     },
   },
 })
@@ -1108,19 +1186,25 @@ keymap('n', '<leader>ms', ':SearchSession<cr>', silent_opts)
 vim.keymap.set('n', '<leader>mt', builtin.treesitter      , silent_opts)
 vim.keymap.set('n', '<leader>mh', builtin.help_tags       , silent_opts)
 vim.keymap.set('n', '<leader>mm', builtin.keymaps         , silent_opts)
-vim.keymap.set('n', '<leader>ml', builtin.keymaps         , silent_opts)
+-- vim.keymap.set('n', '<C-/>', builtin.keymaps         , silent_opts)
 vim.keymap.set('n', '<leader>mk', builtin.keymaps         , silent_opts)
 vim.keymap.set('n', '<leader>mc', builtin.commands        , silent_opts)
 vim.keymap.set('n', '<leader>mo', builtin.vim_options     , silent_opts)
 vim.keymap.set('n', '<leader>"' , ":Telescope neoclip<cr>", silent_opts)
 
 vim.keymap.set("n","<leader>ff", ":Telescope file_browser<cr>", silent_opts)
+vim.keymap.set("n","<leader>fg", ":Telescope file_browser path=%:p:h select_buffer=true<cr>", silent_opts)
+vim.keymap.set("n","<leader>fd", ":Telescope oldfiles<cr>", silent_opts)
+-- nvim-tree keymap
+vim.api.nvim_set_keymap("n", "<leader>fe", ":NvimTreeToggle<cr>", silent_opts)
+-- https://github.com/nvim-tree/nvim-tree.lua/wiki/Recipes
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
 vim.keymap.set('n', '<leader>l', vim.diagnostic.setloclist)
+
 
 -- Maps: DAP {{{
 -- Already defined in config
