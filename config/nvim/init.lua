@@ -952,6 +952,12 @@ require("telescope").load_extension "file_browser"
 -- }}}
 
 -- Config: Treesitter {{{
+vim.cmd([[
+augroup filetype
+    autocmd!
+    autocmd FileType JenkinsFile set filetype=groovy
+augroup END
+]])
 require'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all"
   ensure_installed = { "c", "lua", "rust", "python", "go","json","jsonc"},
