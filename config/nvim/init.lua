@@ -955,7 +955,7 @@ require("telescope").load_extension "file_browser"
 vim.cmd([[
 augroup filetype
     autocmd!
-    autocmd FileType JenkinsFile set filetype=groovy
+    autocmd BufRead,BufNewFile Jenkinsfile set filetype=groovy
 augroup END
 ]])
 require'nvim-treesitter.configs'.setup {
