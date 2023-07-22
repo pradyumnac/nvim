@@ -313,7 +313,7 @@ require('packer').startup(function(use)
   use 'hrsh7th/cmp-nvim-lua' -- LSP source for nvim-cmp
   use 'hrsh7th/cmp-nvim-lsp' -- LSP source for nvim-cmp
   use 'williamboman/mason-lspconfig.nvim'
-  use 'j-hui/fidget.nvim'
+  -- use 'j-hui/fidget.nvim'
 
   -- SNIPPETS
   --
