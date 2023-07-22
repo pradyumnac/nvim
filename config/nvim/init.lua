@@ -724,7 +724,7 @@ require("luasnip.loaders.from_snipmate").lazy_load()
 
 -- Config: LSPFidget {{{
 -- Turn on lsp status information
-require('fidget').setup()
+-- require('fidget').setup()
 
 -- }}}
 
