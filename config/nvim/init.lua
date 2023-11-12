@@ -346,9 +346,9 @@ require('packer').startup(function(use)
     tag = '0.1.0',
     requires = { {'nvim-lua/plenary.nvim'} }
   }
-  use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+  use {'nvim-telescope/telescope-fzf-native.nvim', build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cd build && make' }
   use 'nvim-telescope/telescope-file-browser.nvim'
-  use 'LukasPietzschmann/telescope-tabs'
+  -- use 'LukasPietzschmann/telescope-tabs'
   -- use {
   --   'rmagatti/session-lens',
   --   requires = {'rmagatti/auto-session', 'nvim-telescope/telescope.nvim'}
@@ -446,45 +446,7 @@ require("nvim-tree").setup({
   sort_by = "case_sensitive",
   view = {
     width = 30,
-    icons = {
-      webdev_colors = true,
-      git_placement = "before",
-      modified_placement = "after",
-      padding = " ",
-      symlink_arrow = " ➛ ",
-      show = {
-        file = true,
-        folder = true,
-        folder_arrow = true,
-        git = true,
-        modified = true,
-      },
-      glyphs = {
-        default = "",
-        symlink = "",
-        bookmark = "",
-        modified = "●",
-        folder = {
-          arrow_closed = "",
-          arrow_open = "",
-          default = "",
-          open = "",
-          empty = "",
-          empty_open = "",
-          symlink = "",
-          symlink_open = "",
-        },
-        git = {
-          unstaged = "✗",
-          staged = "✓",
-          unmerged = "",
-          renamed = "➜",
-          untracked = "★",
-          deleted = "",
-          ignored = "◌",
-        },
-      },
-    },
+    side = "left",
   },
   renderer = {
     group_empty = true,
@@ -933,6 +895,13 @@ require('telescope').setup{
     },
   },
   extensions = {
+    fzf = {
+      fuzzy = true,                    -- false will only do exact matching
+      override_generic_sorter = true,  -- override the generic sorter
+      override_file_sorter = true,     -- override the file sorter
+      case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+                                       -- the default case_mode is "smart_case"
+    },
     file_browser = {
       theme = "ivy",
       -- disables netrw and use telescope-file-browser in its place
