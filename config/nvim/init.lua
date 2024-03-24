@@ -272,7 +272,8 @@ require('packer').startup(function(use)
   -- use 'folke/neoconf.nvim' -- folder specific/global lsp configuraton
   use 'williamboman/mason.nvim'
   use 'dstein64/vim-startuptime'
-  use 'github/copilot.vim'
+  use { "nvim-neotest/nvim-nio" }
+  -- use 'github/copilot.vim'
 
   use {
     'nvim-tree/nvim-tree.lua',
