@@ -482,14 +482,6 @@ vim.g.qs_buftype_blacklist = {'terminal', 'nofile'}
 vim.g.qs_filetype_blacklist = {'dashboard', 'startify'}
 -- }}}
 
--- Config: Mason-Lspconfig {{{
--- lua fails over and over in armv8l - not available for arch
--- require("mason-lspconfig").setup {
---     ensure_installed = { "lua_ls", "gopls", "pyright" },
---   automatic_installation=true
--- }
--- }}}
-
 -- Config: Mason {{{
 require("mason").setup({
   ui = {
@@ -498,9 +490,32 @@ require("mason").setup({
       package_pending = "➜",
       package_uninstalled = "✗"
     }
-  }
+  },
+  pip = {
+        ---@since 1.0.0
+        -- Whether to upgrade pip to the latest version in the virtual environment before installing packages.
+        upgrade_pip = false,
+
+        ---@since 1.0.0
+        -- These args will be added to `pip install` calls. Note that setting extra args might impact intended behavior
+        -- and is not recommended.
+        --
+        -- Example: { "--proxy", "https://proxyserver" }
+        install_args = {},
+    },
+  registries = {
+        "github:mason-org/mason-registry",
+    },
 })
 
+-- }}}
+
+-- Config: Mason-Lspconfig {{{
+-- lua fails over and over in armv8l - not available for arch
+require("mason-lspconfig").setup {
+    ensure_installed = { "lua_ls", "gopls", "pyright" },
+  automatic_installation=true
+}
 -- }}}
 
 -- Maps: lspconfig {{{
