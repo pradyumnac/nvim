@@ -601,7 +601,7 @@ require'lspconfig'.lua_ls.setup {
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
 -- TODO: Isnt this duplicate with mason
-local servers = { 'pyright', 'tsserver', 'gopls'}
+local servers = { 'pyright', 'gopls'}
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = on_attach,
