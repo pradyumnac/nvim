@@ -325,6 +325,7 @@ require('packer').startup(function(use)
   use "molleweide/LuaSnip-snippets.nvim"
 
   -- dap
+  use 'nvim-neotest/nvim-nio'
   use 'mfussenegger/nvim-dap'
   use 'rcarriga/nvim-dap-ui'
   use 'theHamsta/nvim-dap-virtual-text'
@@ -586,7 +587,7 @@ require'lspconfig'.lua_ls.setup {
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
 -- TODO: Isnt this duplicate with mason
-local servers = { 'pyright', 'tsserver', 'gopls'}
+local servers = { 'pyright', 'gopls'}
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = on_attach,
